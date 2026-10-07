@@ -3,635 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustador de Columnas y Nombres CSV</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Ajustador de Nombres de Columnas CSV</title>
+    <!-- Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PapaParse CDN para lectura/escritura eficiente de CSV -->
+    <!-- PapaParse para procesamiento CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        /* Tipografía Inter y estilos personalizados de tabla */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans p-4 md:p-8">
 
-    <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="p-2 bg-indigo-600 rounded-xl shadow-inner">
-                    <i data-lucide="file-spreadsheet" class="w-7 h-7 text-indigo-100"></i>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold tracking-tight">Ajustador de Columnas CSV</h1>
-                    <p class="text-xs text-indigo-200">Reordenamiento de Tríadas y Limpieza de Caracteres para Excel / GitHub Pages</p>
-                </div>
-            </div>
-            <span class="text-xs bg-indigo-800/90 border border-indigo-400/30 text-indigo-100 px-3 py-1.5 rounded-full font-medium shadow-sm flex items-center gap-1.5">
-                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
-                Procesamiento Local y Seguro
-            </span>
-        </div>
-    </header>
-
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-slate-200">
         
-        <!-- Tarjeta Informativa de Reglas -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-            <h2 class="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
-                Especificaciones de Transformación
-            </h2>
+        <!-- Encabezado -->
+        <div class="mb-6 border-b pb-4">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 flex items-center gap-2">
+                📂 Ajustador de Nombres de Columnas CSV
+            </h1>
+            <p class="text-sm text-slate-600 mt-1">
+                Herramienta automática para reordenar, renombrar y suprimir columnas de archivos CSV.
+            </p>
+        </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                <!-- Reglas de Supresión / Renombrado -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <span class="font-bold text-slate-800 text-sm block mb-2 text-rose-700 flex items-center gap-1">
-                        <i data-lucide="scissors" class="w-4 h-4"></i> Supresiones y Renombrados Específicos
-                    </span>
-                    <ul class="space-y-1.5 text-slate-600">
-                        <li>&bull; <strong>Ingreso a la Iglesia:</strong> Conserva columna y elimina sus 2 contiguas (+1, +2).</li>
-                        <li>&bull; <strong>Cita con Dios:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado Cita</span> y elimina +2.</li>
-                        <li>&bull; <strong>EnForma:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado EnForma</span> y elimina +2.</li>
-                        <li>&bull; <strong>Obrero Ayudas:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado Ayudas</span> y elimina +2.</li>
-                    </ul>
-                </div>
-
-                <!-- Reglas de las 4 Tríadas Reordenadas -->
-                <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
-                    <span class="font-bold text-indigo-900 text-sm block mb-2 flex items-center gap-1">
-                        <i data-lucide="layers" class="w-4 h-4 text-indigo-600"></i> Conservación Obligatoria de las 4 Tríadas (12 cols)
-                    </span>
-                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-700">
-                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
-                            <strong class="text-indigo-700 block">1. Contacto Inicial</strong>
-                            <span>Estado contacto &bull; Detalle contacto</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
-                            <strong class="text-indigo-700 block">2. Asignado a CFV</strong>
-                            <span>Estado CFV &bull; Detalle CFV</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
-                            <strong class="text-indigo-700 block">3. Registro Café</strong>
-                            <span>Estado CAFE &bull; Detalle CAFE</span>
-                        </div>
-                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
-                            <strong class="text-indigo-700 block">4. Conexión Efectiva</strong>
-                            <span>Estado conexion &bull; Detalle conexion</span>
-                        </div>
-                    </div>
-                </div>
+        <!-- Opciones de Codificación -->
+        <div class="mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+            <div>
+                <label for="encodingSelect" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                    Codificación del Archivo de Entrada
+                </label>
+                <select id="encodingSelect" class="bg-white border border-slate-300 text-slate-800 text-sm rounded-lg p-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="ISO-8859-1" selected>Latino / Excel (ISO-8859-1 / Windows-1252) - Recomendado</option>
+                    <option value="UTF-8">UTF-8 (Estándar Web)</option>
+                </select>
+            </div>
+            <div class="text-xs text-slate-500 max-w-xs">
+                💡 Corregirá automáticamente caracteres especiales dañados (tildes, eñes, símbolos ).
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- Zona de Carga -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <label class="block text-sm font-semibold text-slate-800">1. Seleccionar archivo CSV</label>
-                        <!-- Selección de Codificación -->
-                        <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
-                            <span class="text-[11px] text-slate-500 font-medium px-1">Codificación:</span>
-                            <select id="encoding-select" class="text-xs font-semibold border-0 rounded px-2 py-1 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                                <option value="ISO-8859-1" selected>ISO-8859-1 (Latin1 / Excel)</option>
-                                <option value="UTF-8">UTF-8</option>
-                                <option value="windows-1252">Windows-1252</option>
-                            </select>
-                        </div>
+        <!-- Zona de Carga de Archivos -->
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-slate-700 mb-2">Adjuntar archivo CSV:</label>
+            <div class="flex items-center justify-center w-full">
+                <label for="csvFileInput" class="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-blue-400 rounded-xl cursor-pointer bg-blue-50/50 hover:bg-blue-50 transition">
+                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                        <svg class="w-10 h-10 mb-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 0115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <p class="mb-1 text-sm text-slate-700 font-medium">
+                            <span class="font-bold text-blue-600">Haz clic aquí para seleccionar</span> o arrastra tu archivo CSV
+                        </p>
+                        <p class="text-xs text-slate-500">Formato delimitado por comas (.csv)</p>
                     </div>
-
-                    <div class="mt-2 flex justify-center px-6 pt-6 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative group" id="drop-zone">
-                        <input id="csv-file-input" type="file" accept=".csv, .txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                        <div class="space-y-2 text-center">
-                            <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform shadow-xs">
-                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
-                            </div>
-                            <div class="flex text-sm text-slate-600 justify-center">
-                                <span class="font-semibold text-indigo-600 hover:text-indigo-500">Haz clic para adjuntar</span>
-                                <p class="pl-1">o arrastra el CSV aquí</p>
-                            </div>
-                            <p class="text-xs text-slate-400">Soporta archivos delimitados por comas o punto y coma</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="file-info" class="mt-4 hidden p-3 bg-indigo-50/80 border border-indigo-100 rounded-lg flex items-center justify-between">
-                    <div class="flex items-center space-x-2 truncate">
-                        <i data-lucide="file-text" class="w-5 h-5 text-indigo-600 flex-shrink-0"></i>
-                        <span id="file-name" class="text-xs font-semibold text-indigo-950 truncate"></span>
-                    </div>
-                    <span id="file-size" class="text-xs font-medium text-indigo-600 flex-shrink-0 bg-white px-2 py-0.5 rounded border border-indigo-200"></span>
-                </div>
-            </div>
-
-            <!-- Panel de Control y Estado -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-800 mb-2 flex items-center justify-between">
-                        <span>Registro de Procesamiento</span>
-                        <span class="text-[11px] font-normal text-slate-400">Consola de depuración</span>
-                    </h3>
-                    <div id="status-container" class="h-36 rounded-xl border border-slate-800 bg-slate-900 p-3 overflow-y-auto font-mono text-xs text-slate-200 leading-relaxed custom-scrollbar shadow-inner">
-                        <p class="text-slate-500 italic">> Adjunta un archivo CSV para comenzar el ajuste...</p>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <button id="process-btn" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-indigo-200 transition-all disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                        <i data-lucide="download" class="w-5 h-5"></i>
-                        <span>Procesar y Descargar CSV Ajustado</span>
-                    </button>
-                </div>
+                    <input id="csvFileInput" type="file" accept=".csv" class="hidden" />
+                </label>
             </div>
         </div>
 
-        <div id="structure-summary" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 hidden">
-            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
-                    Verificación de Columnas Finales (<span id="total-cols-count" class="font-bold text-indigo-600">0</span> columnas)
+        <!-- Indicador de Estado / Mensajes -->
+        <div id="statusMessage" class="hidden p-4 mb-6 rounded-lg text-sm font-medium"></div>
+
+        <!-- Resultado y Previsualización -->
+        <div id="resultSection" class="hidden border-t pt-6">
+            <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">¡Archivo Procesado Exitosamente!</h2>
+                    <p id="rowCount" class="text-xs text-slate-600"></p>
+                </div>
+                <button id="downloadBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-6 rounded-lg shadow transition flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Descargar CSV Ajustado
+                </button>
+            </div>
+
+            <!-- Resumen de las 12 Columnas -->
+            <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
+                <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    ✅ Verificación de las 12 Columnas (4 Tríadas) en la salida:
                 </h3>
-                <span id="col-count-diff" class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-medium"></span>
+                <div id="triadasList" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-slate-700"></div>
             </div>
 
-            <!-- Mapeo de Confirmación de las 4 Tríadas -->
-            <div class="mb-5 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                <h4 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i>
-                    Estado de Integridad de las 4 Tríadas (12 Columnas Solicitadas)
-                </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs" id="triads-container">
-                    <!-- Tarjetas dinámicas de tríadas -->
-                </div>
-            </div>
-
-            <p class="text-xs text-slate-500 mb-2 font-medium">Secuencia exacta de encabezados en el archivo resultantes:</p>
-            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2.5 bg-slate-50 rounded-xl border border-slate-200 custom-scrollbar">
-                <!-- Badges de columnas -->
-            </div>
-        </div>
-
-        <div id="preview-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
-            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <div>
-                    <h3 class="text-base font-semibold text-slate-900">Vista Previa de los Primeros Registros</h3>
-                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas transformadas con saneamiento de caracteres aplicados</p>
-                </div>
-                <span id="row-count-badge" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-semibold"></span>
-            </div>
-
-            <div class="overflow-x-auto border rounded-xl border-slate-200 max-h-96 shadow-inner custom-scrollbar">
-                <table id="preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
-                    <thead class="bg-slate-100 sticky top-0 shadow-sm">
-                        <!-- Dynamic headers -->
+            <!-- Vista Previa de Tabla -->
+            <h3 class="text-sm font-bold text-slate-800 mb-2">Vista previa de las primeras filas:</h3>
+            <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-inner max-h-80">
+                <table id="previewTable" class="min-w-full text-xs text-left border-collapse">
+                    <thead class="bg-slate-200 text-slate-800 uppercase font-bold sticky top-0">
+                        <tr id="tableHeader"></tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-slate-200 font-mono">
-                        <!-- Dynamic rows -->
-                    </tbody>
+                    <tbody id="tableBody" class="divide-y divide-slate-200 bg-white"></tbody>
                 </table>
             </div>
         </div>
 
-    </main>
+    </div>
 
-    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 flex items-center justify-between flex-wrap gap-2">
-            <span>Ajustador de Nombres y Tríadas CSV &bull; Diseñado para GitHub Pages</span>
-            <span>Transformación 100% en el Navegador</span>
-        </div>
-    </footer>
-
+    <!-- Lógica JavaScript -->
     <script>
-        lucide.createIcons();
+        let processedCSVData = [];
+        let finalHeaders = [];
+        let rawFileName = "archivo_ajustado.csv";
 
-        // Elementos DOM
-        const fileInput = document.getElementById('csv-file-input');
-        const dropZone = document.getElementById('drop-zone');
-        const fileInfo = document.getElementById('file-info');
-        const fileNameDisplay = document.getElementById('file-name');
-        const fileSizeDisplay = document.getElementById('file-size');
-        const processBtn = document.getElementById('process-btn');
-        const statusContainer = document.getElementById('status-container');
-        const previewSection = document.getElementById('preview-section');
-        const previewTable = document.getElementById('preview-table');
-        const rowCountBadge = document.getElementById('row-count-badge');
-        const encodingSelect = document.getElementById('encoding-select');
-        const structureSummary = document.getElementById('structure-summary');
-        const colsBadges = document.getElementById('cols-badges');
-        const totalColsCount = document.getElementById('total-cols-count');
-        const colCountDiff = document.getElementById('col-count-diff');
-        const triadsContainer = document.getElementById('triads-container');
+        const fileInput = document.getElementById('csvFileInput');
+        const encodingSelect = document.getElementById('encodingSelect');
+        const statusMessage = document.getElementById('statusMessage');
+        const resultSection = document.getElementById('resultSection');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const triadasList = document.getElementById('triadasList');
 
-        let rawParsedData = null;
-        let processedData = null;
-        let originalFile = null;
-
-        // Función de registro en la consola virtual
-        function logMessage(msg, type = 'info') {
-            const p = document.createElement('p');
-            p.className = 'font-mono text-xs py-0.5';
-            if (type === 'error') p.className += ' text-red-400 font-semibold';
-            else if (type === 'success') p.className += ' text-emerald-400 font-semibold';
-            else if (type === 'warn') p.className += ' text-amber-300';
-            else p.className += ' text-slate-300';
-            
-            p.textContent = `> ${msg}`;
-            statusContainer.appendChild(p);
-            statusContainer.scrollTop = statusContainer.scrollHeight;
-        }
-
-        function clearLog() {
-            statusContainer.innerHTML = '';
-        }
+        fileInput.addEventListener('change', handleFile);
+        encodingSelect.addEventListener('change', () => {
+            if (fileInput.files.length > 0) handleFile();
+        });
 
         function sanitizeText(str) {
-            if (str === null || str === undefined) return '';
-            let text = str.toString().trim();
-
-            // Saneamiento de caracteres corruptos de codificación (ej.  reemplazados por sus tildes/eñes correctas)
-            text = text
-                .replace(/\uFFFD/g, 'ñ') // Carácter nulo/reemplazo genérico
-                .replace(/Aos\b/gi, 'Años')
-                .replace(/Aos/gi, 'Años')
-                .replace(/Identificacin\b/gi, 'Identificación')
-                .replace(/Informacin\b/gi, 'Información')
-                .replace(/Telfono\b/gi, 'Teléfono')
-                .replace(/Mvil\b/gi, 'Móvil')
-                .replace(/Ortz\b/gi, 'Ortíz')
-                .replace(/Enrquez\b/gi, 'Enríquez')
-                .replace(/Nstor\b/gi, 'Néstor')
-                .replace(/Montaa\b/gi, 'Montaña')
-                .replace(/Conexin\b/gi, 'Conexión')
-                .replace(/Gmez\b/gi, 'Gómez')
-                .replace(/Perez\b/gi, 'Pérez')
-                .replace(/Rodriguez\b/gi, 'Rodríguez');
-
-            return text;
-        }
-
-        // Manejo de eventos de entrada de archivo
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                originalFile = file;
-                handleFile(file);
-            }
-        });
-
-        encodingSelect.addEventListener('change', () => {
-            if (originalFile) {
-                logMessage(`Re-leyendo archivo con codificación: ${encodingSelect.value}...`, 'warn');
-                handleFile(originalFile);
-            }
-        });
-
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.classList.add('border-indigo-500', 'bg-indigo-50');
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
-            }, false);
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const file = dt.files[0];
-            if (file) {
-                originalFile = file;
-                handleFile(file);
-            }
-        });
-
-        function handleFile(file) {
-            fileNameDisplay.textContent = file.name;
-            fileSizeDisplay.textContent = (file.size / 1024).toFixed(1) + ' KB';
-            fileInfo.classList.remove('hidden');
-
-            clearLog();
-            logMessage(`Cargando archivo: ${file.name}`);
-            logMessage(`Codificación seleccionada: ${encodingSelect.value}`);
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                const fileContent = evt.target.result;
-                
-                Papa.parse(fileContent, {
-                    header: false,
-                    skipEmptyLines: true,
-                    complete: function(results) {
-                        if (!results.data || results.data.length === 0) {
-                            logMessage('El archivo seleccionado no contiene registros.', 'error');
-                            return;
-                        }
-
-                        // Saneamiento de la matriz completa
-                        rawParsedData = results.data.map(row => 
-                            row.map(cell => sanitizeText(cell))
-                        );
-
-                        logMessage(`Lectura correcta: ${rawParsedData.length} filas x ${rawParsedData[0].length} columnas.`, 'success');
-                        processBtn.disabled = false;
-                        
-                        // Procesar y renderizar inmediatamente
-                        processAndDisplay();
-                    },
-                    error: function(err) {
-                        logMessage(`Error al parsear el CSV: ${err.message}`, 'error');
-                    }
-                });
-            };
-
-            reader.readAsText(file, encodingSelect.value);
-        }
-
-        // Normalización para comparación insensible a tildes y mayúsculas
-        function normalizeHeader(str) {
             if (!str) return '';
-            return str.toString()
+            let s = String(str);
+            // Corrección de secuencias corruptas comunes en eñes y tildes
+            s = s.replace(/\uFFFD/g, '')
+                 .replace(/Aos/gi, 'Años').replace(/Aos/gi, 'Años')
+                 .replace(/Ortz/gi, 'Ortíz').replace(/Ortz/gi, 'Ortíz')
+                 .replace(/Enrquez/gi, 'Enríquez').replace(/Enrquez/gi, 'Enríquez')
+                 .replace(/Nstor/gi, 'Néstor').replace(/Nstor/gi, 'Néstor')
+                 .replace(/Montaa/gi, 'Montaña').replace(/Montaa/gi, 'Montaña')
+                 .replace(/Informacin/gi, 'Información').replace(/Informacin/gi, 'Información')
+                 .replace(/Telfono/gi, 'Teléfono').replace(/Telfono/gi, 'Teléfono')
+                 .replace(/Mvil/gi, 'Móvil').replace(/Mvil/gi, 'Móvil');
+            return s;
+        }
+
+        function cleanHeader(header) {
+            if (!header) return '';
+            return sanitizeText(header)
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes para búsqueda flexible
                 .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                .replace(/[^a-z0-9]/g, '')
                 .trim();
         }
 
-        function transformCSVData(rows) {
-            if (!rows || rows.length === 0) return [];
+        function handleFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
 
-            const originalHeaders = rows[0];
-            const normalizedHeaders = originalHeaders.map(normalizeHeader);
+            rawFileName = file.name.replace(/\.csv$/i, '') + '_ajustado.csv';
+            const encoding = encodingSelect.value;
 
-            // Búsqueda flexible por subcadena normalizada
-            function findColIndex(targetPattern) {
-                const targetNorm = normalizeHeader(targetPattern);
-                return normalizedHeaders.findIndex(h => h.includes(targetNorm));
-            }
+            showStatus('Procesando archivo CSV...', 'blue');
 
-            // 1. Localización de columnas pivote
-            const idxIngreso = findColIndex('ingresoalaiglesia');
-            const idxCita = findColIndex('citacondios');
-            const idxEnForma = findColIndex('enforma');
-            const idxObrero = findColIndex('obreroayudas');
-
-            const idxContacto = findColIndex('contactoinicial');
-            const idxCFV = findColIndex('asignadoacfv');
-            const idxCafe = findColIndex('registrocafe');
-            const idxConexion = findColIndex('conexionefectiva');
-
-            logMessage(`Pivotes hallados -> Contacto: [${idxContacto}], CFV: [${idxCFV}], Café: [${idxCafe}], Conexión: [${idxConexion}]`);
-
-            // 2. Definición de columnas a ELIMINAR expresamente
-            const colsToDelete = new Set();
-
-            // Ingreso a la Iglesia: suprimir sus 2 contiguas (+1, +2)
-            if (idxIngreso !== -1) {
-                colsToDelete.add(idxIngreso + 1);
-                colsToDelete.add(idxIngreso + 2);
-            }
-
-            // Cita con Dios: renombra +1, elimina +2
-            if (idxCita !== -1) colsToDelete.add(idxCita + 2);
-
-            // EnForma: renombra +1, elimina +2
-            if (idxEnForma !== -1) colsToDelete.add(idxEnForma + 2);
-
-            // Obrero Ayudas: renombra +1, elimina +2
-            if (idxObrero !== -1) colsToDelete.add(idxObrero + 2);
-
-            // 3. Extracción de los índices de las 4 Tríadas principales (3 columnas por cada una = 12 cols)
-            const getTriadIndices = (baseIdx) => {
-                if (baseIdx === -1) return [];
-                return [baseIdx, baseIdx + 1, baseIdx + 2];
-            };
-
-            const triadContacto = getTriadIndices(idxContacto);
-            const triadCFV = getTriadIndices(idxCFV);
-            const triadCafe = getTriadIndices(idxCafe);
-            const triadConexion = getTriadIndices(idxConexion);
-
-            // Conjunto total de las 12 columnas asociadas a las Tríadas
-            const triadsIndicesSet = new Set([
-                ...triadContacto,
-                ...triadCFV,
-                ...triadCafe,
-                ...triadConexion
-            ]);
-
-            // 4. Mapeo de la secuencia final del nuevo archivo CSV
-            const baseColumns = [];
-
-            // Añadir el resto de columnas respetando orden original, omitiendo las eliminadas y las 12 de las tríadas
-            for (let i = 0; i < originalHeaders.length; i++) {
-                if (colsToDelete.has(i)) continue;
-                if (triadsIndicesSet.has(i)) continue; // Se colocarán ordenadas explícitamente abajo
-                baseColumns.push(i);
-            }
-
-            // Estructura final: Columnas generales + Las 4 Tríadas Garantizadas (12 columnas en orden)
-            const finalIndicesOrder = [
-                ...baseColumns,
-                ...triadContacto,
-                ...triadCFV,
-                ...triadCafe,
-                ...triadConexion
-            ];
-
-            // 5. Construir la nueva matriz de datos
-            return rows.map((row, rowIndex) => {
-                const newRow = [];
-
-                finalIndicesOrder.forEach((colIdx) => {
-                    let cellVal = row[colIdx] !== undefined ? row[colIdx] : '';
-
-                    if (rowIndex === 0) {
-                        // Asignación de nombres requeridos a columnas modificadas
-                        if (idxCita !== -1 && colIdx === idxCita + 1) cellVal = "Estado Cita";
-                        if (idxEnForma !== -1 && colIdx === idxEnForma + 1) cellVal = "Estado EnForma";
-                        if (idxObrero !== -1 && colIdx === idxObrero + 1) cellVal = "Estado Ayudas";
-
-                        // Nombres exactos para GRUPO 1: Contacto Inicial
-                        if (idxContacto !== -1) {
-                            if (colIdx === idxContacto) cellVal = "Contacto Inicial";
-                            if (colIdx === idxContacto + 1) cellVal = "Estado contacto";
-                            if (colIdx === idxContacto + 2) cellVal = "Detalle contacto";
-                        }
-
-                        // Nombres exactos para GRUPO 2: Asignado a CFV
-                        if (idxCFV !== -1) {
-                            if (colIdx === idxCFV) cellVal = "Asignado a CFV";
-                            if (colIdx === idxCFV + 1) cellVal = "Estado CFV";
-                            if (colIdx === idxCFV + 2) cellVal = "Detalle CFV";
-                        }
-
-                        // Nombres exactos para GRUPO 3: Registro Café
-                        if (idxCafe !== -1) {
-                            if (colIdx === idxCafe) cellVal = "Registro Café";
-                            if (colIdx === idxCafe + 1) cellVal = "Estado CAFE";
-                            if (colIdx === idxCafe + 2) cellVal = "Detalle CAFE";
-                        }
-
-                        // Nombres exactos para GRUPO 4: Conexión Efectiva
-                        if (idxConexion !== -1) {
-                            if (colIdx === idxConexion) cellVal = "Conexión Efectiva";
-                            if (colIdx === idxConexion + 1) cellVal = "Estado conexion";
-                            if (colIdx === idxConexion + 2) cellVal = "Detalle conexion";
-                        }
+            Papa.parse(file, {
+                encoding: encoding,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    if (results.data && results.data.length > 0) {
+                        processCSV(results.data);
+                    } else {
+                        showStatus('El archivo CSV parece estar vacío o corrupto.', 'red');
                     }
-
-                    newRow.push(sanitizeText(cellVal));
-                });
-
-                return newRow;
+                },
+                error: function(err) {
+                    showStatus('Error al leer el archivo CSV: ' + err.message, 'red');
+                }
             });
         }
 
-        function processAndDisplay() {
-            if (!rawParsedData) return;
+        function processCSV(data) {
+            const originalHeaders = data[0].map(h => sanitizeText(h).trim());
+            const rows = data.slice(1);
 
-            processedData = transformCSVData(rawParsedData);
-            logMessage(`Transformación finalizada. Columnas totales del CSV ajustado: ${processedData[0].length}`, 'success');
+            // Búsqueda flexible de índices de columnas
+            function findIndex(pattern) {
+                return originalHeaders.findIndex(h => cleanHeader(h).includes(pattern));
+            }
 
-            renderStructureSummary(rawParsedData[0].length, processedData[0]);
-            renderPreview(processedData);
-        }
+            const idxIngreso = findIndex('ingreso a la iglesia');
+            const idxCita = findIndex('cita con dios');
+            const idxEnForma = findIndex('enforma');
+            const idxAyudas = findIndex('obrero ayudas');
 
-        function renderStructureSummary(origCount, headers) {
-            colsBadges.innerHTML = '';
-            triadsContainer.innerHTML = '';
+            // Índices de las 4 tríadas principales en el archivo original
+            const idxContacto = findIndex('contacto inicial');
+            const idxCFV = findIndex('asignado a cfv');
+            const idxCafe = findIndex('registro cafe');
+            const idxConexion = findIndex('conexion efectiva');
 
-            totalColsCount.textContent = headers.length;
-            colCountDiff.textContent = `Originales: ${origCount} col | Resultantes: ${headers.length} col (${origCount - headers.length} eliminadas)`;
+            // Conjunto de índices que deben suprimirse
+            const suppressedIndices = new Set();
 
-            // Estructura oficial de las 4 Tríadas
-            const triadsDefinition = [
-                { title: '1. Contacto Inicial', items: ['Contacto Inicial', 'Estado contacto', 'Detalle contacto'] },
-                { title: '2. Asignado a CFV', items: ['Asignado a CFV', 'Estado CFV', 'Detalle CFV'] },
-                { title: '3. Registro Café', items: ['Registro Café', 'Estado CAFE', 'Detalle CAFE'] },
-                { title: '4. Conexión Efectiva', items: ['Conexión Efectiva', 'Estado conexion', 'Detalle conexion'] }
-            ];
+            // 1. Dos columnas contiguas a "Ingreso a la Iglesia"
+            if (idxIngreso !== -1) {
+                suppressedIndices.add(idxIngreso + 1);
+                suppressedIndices.add(idxIngreso + 2);
+            }
 
-            const allSpecialNames = new Set();
+            // 2. Columna V (siguiente a Estado Cita)
+            if (idxCita !== -1) {
+                suppressedIndices.add(idxCita + 2);
+            }
 
-            triadsDefinition.forEach(t => {
-                const card = document.createElement('div');
-                card.className = 'bg-white p-3 rounded-lg border border-indigo-200 shadow-xs flex flex-col justify-between';
-                
-                let itemsHTML = '';
-                t.items.forEach(item => {
-                    allSpecialNames.add(item);
-                    const present = headers.includes(item);
-                    itemsHTML += `
-                        <div class="flex items-center justify-between py-0.5">
-                            <span class="${present ? 'text-slate-800 font-medium' : 'text-red-500 line-through'} truncate">${item}</span>
-                            <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold ${present ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
-                                ${present ? 'OK' : 'Falta'}
-                            </span>
-                        </div>
-                    `;
-                });
+            // 3. Columna Y (siguiente a Estado EnForma)
+            if (idxEnForma !== -1) {
+                suppressedIndices.add(idxEnForma + 2);
+            }
 
-                card.innerHTML = `
-                    <div class="font-bold text-indigo-950 mb-1 border-b border-indigo-100 pb-1 text-[11px]">${t.title}</div>
-                    <div class="space-y-0.5">${itemsHTML}</div>
-                `;
-                triadsContainer.appendChild(card);
-            });
+            // 4. Siguiente a Estado Ayudas
+            if (idxAyudas !== -1) {
+                suppressedIndices.add(idxAyudas + 2);
+            }
 
-            // Badges individuales para la lista completa
-            headers.forEach((h, index) => {
-                const badge = document.createElement('span');
-                const isSpecial = allSpecialNames.has(h);
+            // Mapear el nuevo encabezado
+            let newHeaders = [];
+            let columnSourceIndices = []; // De qué columna original viene cada posición del nuevo archivo
 
-                if (isSpecial) {
-                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-indigo-600 text-white shadow-xs';
-                } else if (['Estado Cita', 'Estado EnForma', 'Estado Ayudas'].includes(h)) {
-                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300';
-                } else {
-                    badge.className = 'px-2 py-1 rounded text-xs font-medium bg-white text-slate-700 border border-slate-200';
+            for (let i = 0; i < originalHeaders.length; i++) {
+                // Saltar si es de las tríadas (las insertaremos explícitamente al final en orden exacto)
+                if (
+                    (idxContacto !== -1 && (i === idxContacto || i === idxContacto + 1 || i === idxContacto + 2)) ||
+                    (idxCFV !== -1 && (i === idxCFV || i === idxCFV + 1 || i === idxCFV + 2)) ||
+                    (idxCafe !== -1 && (i === idxCafe || i === idxCafe + 1 || i === idxCafe + 2)) ||
+                    (idxConexion !== -1 && (i === idxConexion || i === idxConexion + 1 || i === idxConexion + 2))
+                ) {
+                    continue;
                 }
 
-                badge.textContent = `${index + 1}. ${h}`;
-                colsBadges.appendChild(badge);
+                // Saltar si fue suprimida explícitamente
+                if (suppressedIndices.has(i)) {
+                    continue;
+                }
+
+                // Aplicar renombres específicos
+                let headerName = originalHeaders[i];
+                if (idxCita !== -1 && i === idxCita + 1) headerName = 'Estado Cita';
+                if (idxEnForma !== -1 && i === idxEnForma + 1) headerName = 'Estado EnForma';
+                if (idxAyudas !== -1 && i === idxAyudas + 1) headerName = 'Estado Ayudas';
+
+                newHeaders.push(headerName);
+                columnSourceIndices.push(i);
+            }
+
+            // DEFINICIÓN Y ADICIÓN ESTRICTA DE LAS 12 COLUMNAS (4 TRÍADAS) AL FINAL
+            const triadasConfig = [
+                { baseIdx: idxContacto, defaultNames: ['Contacto Inicial', 'Estado contacto', 'Detalle contacto'] },
+                { baseIdx: idxCFV, defaultNames: ['Asignado a CFV', 'Estado CFV', 'Detalle CFV'] },
+                { baseIdx: idxCafe, defaultNames: ['Registro Café', 'Estado CAFE', 'Detalle CAFE'] },
+                { baseIdx: idxConexion, defaultNames: ['Conexión Efectiva', 'Estado conexion', 'Detalle conexion'] }
+            ];
+
+            triadasConfig.forEach(t => {
+                for (let offset = 0; offset < 3; offset++) {
+                    const targetIdx = t.baseIdx !== -1 ? t.baseIdx + offset : -1;
+                    newHeaders.push(t.defaultNames[offset]);
+                    columnSourceIndices.push(targetIdx);
+                }
             });
 
-            structureSummary.classList.remove('hidden');
-        }
-
-        // Renderizado de tabla de vista previa de los datos
-        function renderPreview(data) {
-            if (!data || data.length === 0) return;
-
-            const thead = previewTable.querySelector('thead');
-            const tbody = previewTable.querySelector('tbody');
-
-            thead.innerHTML = '';
-            tbody.innerHTML = '';
-
-            // Encabezados
-            const headerRow = document.createElement('tr');
-            data[0].forEach((headerText) => {
-                const th = document.createElement('th');
-                th.className = 'px-3 py-2.5 text-left font-semibold text-slate-800 bg-slate-100/90 border-b border-slate-200 whitespace-nowrap';
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-            thead.appendChild(headerRow);
-
-            // Muestra de las primeras 5 filas
-            const sampleRows = data.slice(1, 6);
-            sampleRows.forEach(rowData => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-indigo-50/40 transition-colors';
-                rowData.forEach(cellText => {
-                    const td = document.createElement('td');
-                    td.className = 'px-3 py-2 border-b border-slate-100 whitespace-nowrap text-slate-700 text-xs';
-                    td.textContent = cellText;
-                    tr.appendChild(td);
+            // Construir los datos transformados
+            const transformedRows = rows.map(row => {
+                return columnSourceIndices.map(srcIdx => {
+                    if (srcIdx === -1 || srcIdx >= row.length) return '';
+                    return sanitizeText(row[srcIdx] || '');
                 });
-                tbody.appendChild(tr);
             });
 
-            rowCountBadge.textContent = `${data.length - 1} filas procesadas`;
-            previewSection.classList.remove('hidden');
+            finalHeaders = newHeaders;
+            processedCSVData = [finalHeaders, ...transformedRows];
+
+            displayResults(transformedRows.length);
         }
 
-        processBtn.addEventListener('click', () => {
-            if (!processedData) return;
+        function displayResults(totalRows) {
+            showStatus(`✅ Archivo procesado con éxito. Se generaron ${finalHeaders.length} columnas y${totalRows} filas.`, 'green');
+            resultSection.classList.remove('hidden');
+            document.getElementById('rowCount').textContent = `Total de registros: ${totalRows}`;
 
-            logMessage('Generando CSV codificado con UTF-8 BOM para Microsoft Excel...');
-            
-            // Re-procesar para asegurar que tome la última matriz
-            processedData = transformCSVData(rawParsedData);
+            // Mostrar la lista de verificación de las 4 Tríadas
+            triadasList.innerHTML = `
+                <div class="p-2 bg-white rounded border border-slate-200">1. Contacto Inicial / Estado contacto / Detalle contacto</div>
+                <div class="p-2 bg-white rounded border border-slate-200">2. Asignado a CFV / Estado CFV / Detalle CFV</div>
+                <div class="p-2 bg-white rounded border border-slate-200">3. Registro Café / Estado CAFE / Detalle CAFE</div>
+                <div class="p-2 bg-white rounded border border-slate-200">4. Conexión Efectiva / Estado conexion / Detalle conexion</div>
+            `;
 
-            const csvOutput = Papa.unparse(processedData);
-            
-            // Inclusión de BOM UTF-8 (\uFEFF -> 0xEF, 0xBB, 0xBF)
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
-            
-            const originalName = originalFile ? originalFile.name : 'archivo.csv';
-            const newFileName = originalName.replace(/(\.csv|\.txt)$/i, '_ajustado.csv');
-            
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', newFileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            logMessage(`¡Descarga completada! Nombre: ${newFileName}`, 'success');
-        });
-    </script>
-</body>
-</html>
+            // Renderizar encabezados de la tabla de vista previa
+            const thead = document.getElementById('tableHeader');
+            thead.innerHTML = finalHeaders.map(h => `<th class="p-2.5 border-b border-slate-300 font-semibold text
