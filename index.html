@@ -19,7 +19,7 @@
                 📂 Ajustador de Nombres de Columnas CSV
             </h1>
             <p class="text-sm text-slate-600 mt-1">
-                Herramienta automática para reordenar, renombrar y suprimir columnas de archivos CSV.
+                Herramienta para reorganizar, suprimir columnas y reordenar tríadas sin dejar espacios o columnas vacías.
             </p>
         </div>
 
@@ -35,11 +35,11 @@
                 </select>
             </div>
             <div class="text-xs text-slate-500 max-w-xs">
-                💡 Corregirá automáticamente caracteres especiales dañados (tildes, eñes, símbolos ).
+                💡 Limpia automáticamente caracteres especiales dañados (tildes, eñes, caracteres ).
             </div>
         </div>
 
-        <!-- Zona de Carga de Archivos -->
+        <!-- Carga de Archivos -->
         <div class="mb-6">
             <label class="block text-sm font-semibold text-slate-700 mb-2">Adjuntar archivo CSV:</label>
             <div class="flex items-center justify-center w-full">
@@ -58,10 +58,10 @@
             </div>
         </div>
 
-        <!-- Indicador de Estado / Mensajes -->
+        <!-- Estado / Mensajes -->
         <div id="statusMessage" class="hidden p-4 mb-6 rounded-lg text-sm font-medium"></div>
 
-        <!-- Resultado y Previsualización -->
+        <!-- Resultado -->
         <div id="resultSection" class="hidden border-t pt-6">
             <div class="flex flex-wrap items-center justify-between mb-4 gap-4">
                 <div>
@@ -76,16 +76,21 @@
                 </button>
             </div>
 
-            <!-- Resumen de las 12 Columnas -->
+            <!-- Resumen Tríadas -->
             <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6">
                 <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                    ✅ Verificación de las 12 Columnas (4 Tríadas) en la salida:
+                    ✅ Tríadas ubicadas de forma continua al final (sin columnas vacías):
                 </h3>
-                <div id="triadasList" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-slate-700"></div>
+                <div id="triadasList" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs font-mono text-slate-700">
+                    <div class="p-2 bg-white rounded border border-slate-200">1. Contacto Inicial / Estado contacto / Detalle contacto</div>
+                    <div class="p-2 bg-white rounded border border-slate-200">2. Asignado a CFV / Estado CFV / Detalle CFV</div>
+                    <div class="p-2 bg-white rounded border border-slate-200">3. Registro Café / Estado CAFE / Detalle CAFE</div>
+                    <div class="p-2 bg-white rounded border border-slate-200">4. Conexión Efectiva / Estado conexion / Detalle conexion</div>
+                </div>
             </div>
 
             <!-- Vista Previa de Tabla -->
-            <h3 class="text-sm font-bold text-slate-800 mb-2">Vista previa de las primeras filas:</h3>
+            <h3 class="text-sm font-bold text-slate-800 mb-2">Vista previa de encabezados y primeras filas:</h3>
             <div class="overflow-x-auto border border-slate-200 rounded-lg shadow-inner max-h-80">
                 <table id="previewTable" class="min-w-full text-xs text-left border-collapse">
                     <thead class="bg-slate-200 text-slate-800 uppercase font-bold sticky top-0">
@@ -98,7 +103,7 @@
 
     </div>
 
-    <!-- Lógica JavaScript -->
+    <!-- JavaScript -->
     <script>
         let processedCSVData = [];
         let finalHeaders = [];
@@ -109,7 +114,6 @@
         const statusMessage = document.getElementById('statusMessage');
         const resultSection = document.getElementById('resultSection');
         const downloadBtn = document.getElementById('downloadBtn');
-        const triadasList = document.getElementById('triadasList');
 
         fileInput.addEventListener('change', handleFile);
         encodingSelect.addEventListener('change', () => {
@@ -119,169 +123,20 @@
         function sanitizeText(str) {
             if (!str) return '';
             let s = String(str);
-            // Corrección de secuencias corruptas comunes en eñes y tildes
             s = s.replace(/\uFFFD/g, '')
-                 .replace(/Aos/gi, 'Años').replace(/Aos/gi, 'Años')
-                 .replace(/Ortz/gi, 'Ortíz').replace(/Ortz/gi, 'Ortíz')
-                 .replace(/Enrquez/gi, 'Enríquez').replace(/Enrquez/gi, 'Enríquez')
-                 .replace(/Nstor/gi, 'Néstor').replace(/Nstor/gi, 'Néstor')
-                 .replace(/Montaa/gi, 'Montaña').replace(/Montaa/gi, 'Montaña')
-                 .replace(/Informacin/gi, 'Información').replace(/Informacin/gi, 'Información')
-                 .replace(/Telfono/gi, 'Teléfono').replace(/Telfono/gi, 'Teléfono')
-                 .replace(/Mvil/gi, 'Móvil').replace(/Mvil/gi, 'Móvil');
+                 .replace(/Aos/gi, 'Años')
+                 .replace(/Ortz/gi, 'Ortíz')
+                 .replace(/Enrquez/gi, 'Enríquez')
+                 .replace(/Nstor/gi, 'Néstor')
+                 .replace(/Montaa/gi, 'Montaña')
+                 .replace(/Informacin/gi, 'Información')
+                 .replace(/Telfono/gi, 'Teléfono')
+                 .replace(/Mvil/gi, 'Móvil');
             return s;
         }
 
         function cleanHeader(header) {
             if (!header) return '';
             return sanitizeText(header)
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes para búsqueda flexible
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                 .toLowerCase()
-                .trim();
-        }
-
-        function handleFile() {
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            rawFileName = file.name.replace(/\.csv$/i, '') + '_ajustado.csv';
-            const encoding = encodingSelect.value;
-
-            showStatus('Procesando archivo CSV...', 'blue');
-
-            Papa.parse(file, {
-                encoding: encoding,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if (results.data && results.data.length > 0) {
-                        processCSV(results.data);
-                    } else {
-                        showStatus('El archivo CSV parece estar vacío o corrupto.', 'red');
-                    }
-                },
-                error: function(err) {
-                    showStatus('Error al leer el archivo CSV: ' + err.message, 'red');
-                }
-            });
-        }
-
-        function processCSV(data) {
-            const originalHeaders = data[0].map(h => sanitizeText(h).trim());
-            const rows = data.slice(1);
-
-            // Búsqueda flexible de índices de columnas
-            function findIndex(pattern) {
-                return originalHeaders.findIndex(h => cleanHeader(h).includes(pattern));
-            }
-
-            const idxIngreso = findIndex('ingreso a la iglesia');
-            const idxCita = findIndex('cita con dios');
-            const idxEnForma = findIndex('enforma');
-            const idxAyudas = findIndex('obrero ayudas');
-
-            // Índices de las 4 tríadas principales en el archivo original
-            const idxContacto = findIndex('contacto inicial');
-            const idxCFV = findIndex('asignado a cfv');
-            const idxCafe = findIndex('registro cafe');
-            const idxConexion = findIndex('conexion efectiva');
-
-            // Conjunto de índices que deben suprimirse
-            const suppressedIndices = new Set();
-
-            // 1. Dos columnas contiguas a "Ingreso a la Iglesia"
-            if (idxIngreso !== -1) {
-                suppressedIndices.add(idxIngreso + 1);
-                suppressedIndices.add(idxIngreso + 2);
-            }
-
-            // 2. Columna V (siguiente a Estado Cita)
-            if (idxCita !== -1) {
-                suppressedIndices.add(idxCita + 2);
-            }
-
-            // 3. Columna Y (siguiente a Estado EnForma)
-            if (idxEnForma !== -1) {
-                suppressedIndices.add(idxEnForma + 2);
-            }
-
-            // 4. Siguiente a Estado Ayudas
-            if (idxAyudas !== -1) {
-                suppressedIndices.add(idxAyudas + 2);
-            }
-
-            // Mapear el nuevo encabezado
-            let newHeaders = [];
-            let columnSourceIndices = []; // De qué columna original viene cada posición del nuevo archivo
-
-            for (let i = 0; i < originalHeaders.length; i++) {
-                // Saltar si es de las tríadas (las insertaremos explícitamente al final en orden exacto)
-                if (
-                    (idxContacto !== -1 && (i === idxContacto || i === idxContacto + 1 || i === idxContacto + 2)) ||
-                    (idxCFV !== -1 && (i === idxCFV || i === idxCFV + 1 || i === idxCFV + 2)) ||
-                    (idxCafe !== -1 && (i === idxCafe || i === idxCafe + 1 || i === idxCafe + 2)) ||
-                    (idxConexion !== -1 && (i === idxConexion || i === idxConexion + 1 || i === idxConexion + 2))
-                ) {
-                    continue;
-                }
-
-                // Saltar si fue suprimida explícitamente
-                if (suppressedIndices.has(i)) {
-                    continue;
-                }
-
-                // Aplicar renombres específicos
-                let headerName = originalHeaders[i];
-                if (idxCita !== -1 && i === idxCita + 1) headerName = 'Estado Cita';
-                if (idxEnForma !== -1 && i === idxEnForma + 1) headerName = 'Estado EnForma';
-                if (idxAyudas !== -1 && i === idxAyudas + 1) headerName = 'Estado Ayudas';
-
-                newHeaders.push(headerName);
-                columnSourceIndices.push(i);
-            }
-
-            // DEFINICIÓN Y ADICIÓN ESTRICTA DE LAS 12 COLUMNAS (4 TRÍADAS) AL FINAL
-            const triadasConfig = [
-                { baseIdx: idxContacto, defaultNames: ['Contacto Inicial', 'Estado contacto', 'Detalle contacto'] },
-                { baseIdx: idxCFV, defaultNames: ['Asignado a CFV', 'Estado CFV', 'Detalle CFV'] },
-                { baseIdx: idxCafe, defaultNames: ['Registro Café', 'Estado CAFE', 'Detalle CAFE'] },
-                { baseIdx: idxConexion, defaultNames: ['Conexión Efectiva', 'Estado conexion', 'Detalle conexion'] }
-            ];
-
-            triadasConfig.forEach(t => {
-                for (let offset = 0; offset < 3; offset++) {
-                    const targetIdx = t.baseIdx !== -1 ? t.baseIdx + offset : -1;
-                    newHeaders.push(t.defaultNames[offset]);
-                    columnSourceIndices.push(targetIdx);
-                }
-            });
-
-            // Construir los datos transformados
-            const transformedRows = rows.map(row => {
-                return columnSourceIndices.map(srcIdx => {
-                    if (srcIdx === -1 || srcIdx >= row.length) return '';
-                    return sanitizeText(row[srcIdx] || '');
-                });
-            });
-
-            finalHeaders = newHeaders;
-            processedCSVData = [finalHeaders, ...transformedRows];
-
-            displayResults(transformedRows.length);
-        }
-
-        function displayResults(totalRows) {
-            showStatus(`✅ Archivo procesado con éxito. Se generaron ${finalHeaders.length} columnas y${totalRows} filas.`, 'green');
-            resultSection.classList.remove('hidden');
-            document.getElementById('rowCount').textContent = `Total de registros: ${totalRows}`;
-
-            // Mostrar la lista de verificación de las 4 Tríadas
-            triadasList.innerHTML = `
-                <div class="p-2 bg-white rounded border border-slate-200">1. Contacto Inicial / Estado contacto / Detalle contacto</div>
-                <div class="p-2 bg-white rounded border border-slate-200">2. Asignado a CFV / Estado CFV / Detalle CFV</div>
-                <div class="p-2 bg-white rounded border border-slate-200">3. Registro Café / Estado CAFE / Detalle CAFE</div>
-                <div class="p-2 bg-white rounded border border-slate-200">4. Conexión Efectiva / Estado conexion / Detalle conexion</div>
-            `;
-
-            // Renderizar encabezados de la tabla de vista previa
-            const thead = document.getElementById('tableHeader');
-            thead.innerHTML = finalHeaders.map(h => `<th class="p-2.5 border-b border-slate-300 font-semibold text
