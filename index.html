@@ -40,7 +40,18 @@
             <!-- File Input Area -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">Seleccionar archivo CSV (.csv)</label>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-sm font-medium text-slate-700">1. Seleccionar archivo CSV (.csv)</label>
+                        <!-- Selector de Codificación -->
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xs text-slate-500">Codificación:</span>
+                            <select id="encoding-select" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option value="ISO-8859-1" selected>ISO-8859-1 (Excel / Windows)</option>
+                                <option value="UTF-8">UTF-8</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative" id="drop-zone">
                         <input id="csv-file-input" type="file" accept=".csv, .txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                         <div class="space-y-1 text-center">
@@ -75,7 +86,7 @@
                 <div class="mt-4 flex gap-3">
                     <button id="process-btn" disabled class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
                         <i data-lucide="cog" class="w-4 h-4"></i>
-                        <span>Procesar y Descargar</span>
+                        <span>Procesar y Descargar CSV</span>
                     </button>
                 </div>
             </div>
@@ -87,9 +98,9 @@
                 <h3 class="text-md font-semibold text-slate-900">Vista Previa del Resultado (primeras 5 filas)</h3>
                 <span id="row-count-badge" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium"></span>
             </div>
-            <div class="overflow-x-auto border rounded-lg border-slate-200">
+            <div class="overflow-x-auto border rounded-lg border-slate-200 max-h-96">
                 <table id="preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
-                    <thead class="bg-slate-50">
+                    <thead class="bg-slate-50 sticky top-0 shadow-sm">
                         <!-- Dynamic headers -->
                     </thead>
                     <tbody class="bg-white divide-y divide-slate-200 font-mono">
@@ -110,7 +121,6 @@
 
     <!-- App Logic JavaScript -->
     <script>
-        // Inicializar iconos
         lucide.createIcons();
 
         // Elementos DOM
@@ -124,12 +134,13 @@
         const previewSection = document.getElementById('preview-section');
         const previewTable = document.getElementById('preview-table');
         const rowCountBadge = document.getElementById('row-count-badge');
+        const encodingSelect = document.getElementById('encoding-select');
 
         let rawParsedData = null;
         let processedData = null;
-        let originalFileName = "";
+        let originalFile = null;
 
-        // Helper para agregar logs en pantalla
+        // Log helper
         function logMessage(msg, type = 'info') {
             const p = document.createElement('p');
             if (type === 'error') p.className = 'text-red-600 font-semibold';
@@ -145,13 +156,59 @@
             statusContainer.innerHTML = '';
         }
 
-        // Manejo de eventos de archivos
+        // Reparación de caracteres corruptos (Tildes / Ñs dañadas)
+        function sanitizeText(str) {
+            if (typeof str !== 'string') return str;
+
+            let text = str;
+
+            // Reemplazos para caracteres corruptos comunes
+            const replacements = [
+                [/[\uFFFD\u001F\u007F-\u009F]/g, ''], // Eliminar caracteres invisibles/desconocidos
+                [/A\uFFFDos/g, 'Años'],
+                [/Aos\b/g, 'Años'],
+                [/Ort\uFFFDz/g, 'Ortíz'],
+                [/Ortz\b/g, 'Ortíz'],
+                [/Enr\uFFFDquez/g, 'Enríquez'],
+                [/Enrquez\b/g, 'Enríquez'],
+                [/N\uFFFDstor/g, 'Néstor'],
+                [/Nstor\b/g, 'Néstor'],
+                [/Monta\uFFFDa/g, 'Montaña'],
+                [/Montaa\b/g, 'Montaña'],
+                [/Informaci\uFFFDn/g, 'Información'],
+                [/Informacin\b/g, 'Información'],
+                [/Identificaci\uFFFDn/g, 'Identificación'],
+                [/Identificacin\b/g, 'Identificación'],
+                [/Tel\uFFFDfono/g, 'Teléfono'],
+                [/Telfono\b/g, 'Teléfono'],
+                [/M\uFFFDvil/g, 'Móvil'],
+                [/Mvil\b/g, 'Móvil'],
+                [/Conexi\uFFFDn/g, 'Conexión'],
+                [/Conexin\b/g, 'Conexión']
+            ];
+
+            replacements.forEach(([pattern, replacement]) => {
+                text = text.replace(pattern, replacement);
+            });
+
+            return text;
+        }
+
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) handleFile(file);
+            if (file) {
+                originalFile = file;
+                handleFile(file);
+            }
         });
 
-        // Drag & Drop
+        encodingSelect.addEventListener('change', () => {
+            if (originalFile) {
+                logMessage(`Cambiando codificación a: ${encodingSelect.value}`);
+                handleFile(originalFile);
+            }
+        });
+
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
@@ -169,178 +226,205 @@
         dropZone.addEventListener('drop', (e) => {
             const dt = e.dataTransfer;
             const file = dt.files[0];
-            if (file) handleFile(file);
+            if (file) {
+                originalFile = file;
+                handleFile(file);
+            }
         });
 
         function handleFile(file) {
             if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
                 clearLog();
-                logMessage('Error: Por favor selecciona un archivo con formato .csv', 'error');
+                logMessage('Error: Selecciona un archivo .csv o .txt válido', 'error');
                 return;
             }
 
-            originalFileName = file.name;
             fileNameDisplay.textContent = file.name;
             fileSizeDisplay.textContent = (file.size / 1024).toFixed(1) + ' KB';
             fileInfo.classList.remove('hidden');
 
             clearLog();
-            logMessage(`Archivo cargado: ${file.name}`);
-            logMessage('Leyendo contenido del CSV...');
+            logMessage(`Archivo seleccionado: ${file.name}`);
+            logMessage(`Leyendo con codificación: ${encodingSelect.value}...`);
 
-            Papa.parse(file, {
-                header: false, // Leer como matriz para controlar índices exactos de columnas
-                skipEmptyLines: true,
-                complete: function(results) {
-                    rawParsedData = results.data;
-                    logMessage(`Archivo parseado con éxito. Total filas: ${rawParsedData.length}`, 'success');
-                    processBtn.disabled = false;
-                },
-                error: function(err) {
-                    logMessage(`Error al leer archivo: ${err.message}`, 'error');
-                }
-            });
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const fileContent = evt.target.result;
+                
+                Papa.parse(fileContent, {
+                    header: false,
+                    skipEmptyLines: true,
+                    complete: function(results) {
+                        // Aplicar limpieza de texto inmediata a todos los registros
+                        rawParsedData = results.data.map(row => 
+                            row.map(cell => sanitizeText((cell || '').toString().trim()))
+                        );
+                        logMessage(`Archivo leído correctamente. Total filas: ${rawParsedData.length}`, 'success');
+                        processBtn.disabled = false;
+                        
+                        // Procesar y mostrar vista previa automáticamente
+                        processAndDisplay();
+                    },
+                    error: function(err) {
+                        logMessage(`Error al leer archivo: ${err.message}`, 'error');
+                    }
+                });
+            };
+
+            reader.readAsText(file, encodingSelect.value);
         }
 
-        // Proceso de transformación según requerimientos
+        function normalizeHeader(str) {
+            if (!str) return '';
+            return str.toString()
+                .toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar tildes para comparación flexible
+                .trim();
+        }
+
         function transformCSVData(rows) {
             if (!rows || rows.length === 0) return [];
 
-            // Limpieza de nombres de cabecera (trim)
-            const headers = rows[0].map(h => (h || '').toString().trim());
+            const rawHeaders = rows[0];
+            const normalizedHeaders = rawHeaders.map(normalizeHeader);
 
-            // Helper para obtener el índice de una columna por nombre exacto o normalizado
-            function getColIndex(name) {
-                return headers.findIndex(h => h.toLowerCase() === name.toLowerCase().trim());
+            function findColIdx(name) {
+                const normTarget = normalizeHeader(name);
+                return normalizedHeaders.findIndex(h => h.includes(normTarget));
             }
 
-            // Mapeo de columnas requeridas
-            const idxIngreso = getColIndex('Ingreso a la Iglesia');
-            const idxCita = getColIndex('Cita con Dios');
-            const idxEnForma = getColIndex('EnForma');
-            const idxObrero = getColIndex('Obrero Ayudas');
+            // Índices base
+            const idxIngreso = findColIdx('ingreso a la iglesia');
+            const idxCita = findColIdx('cita con dios');
+            const idxEnForma = findColIdx('enforma');
+            const idxObrero = findColIdx('obrero ayudas');
 
-            const idxContacto = getColIndex('Contacto Inicial');
-            const idxConexion = getColIndex('Conexión Efectiva');
-            const idxCFV = getColIndex('Asignado a CFV');
-            const idxCafe = getColIndex('Registro Café');
+            const idxContacto = findColIdx('contacto inicial');
+            const idxCFV = findColIdx('asignado a cfv');
+            const idxCafe = findColIdx('registro cafe');
+            const idxConexion = findColIdx('conexion efectiva');
 
-            // Determinar qué columnas descartar totalmente
+            // Determinar columnas a eliminar
             const colsToDelete = new Set();
 
-            // 1. Columnas contiguas a "Ingreso a la Iglesia" (R y S -> siguientes 2 columnas)
+            // 1. Dos columnas contiguas a "Ingreso a la Iglesia"
             if (idxIngreso !== -1) {
                 colsToDelete.add(idxIngreso + 1);
                 colsToDelete.add(idxIngreso + 2);
             }
 
-            // 2. Cita con Dios: renombrar +1 ("Estado Cita") y suprimir +2 (V)
-            if (idxCita !== -1) {
-                colsToDelete.add(idxCita + 2);
-            }
+            // 2. Cita con Dios: la siguiente (+1) se renombra a "Estado Cita", la posterior (+2) se elimina
+            if (idxCita !== -1) colsToDelete.add(idxCita + 2);
 
-            // 3. EnForma: renombrar +1 ("Estado EnForma") y suprimir +2 (Y)
-            if (idxEnForma !== -1) {
-                colsToDelete.add(idxEnForma + 2);
-            }
+            // 3. EnForma: la siguiente (+1) se renombra a "Estado EnForma", la posterior (+2) se elimina
+            if (idxEnForma !== -1) colsToDelete.add(idxEnForma + 2);
 
-            // 4. Obrero Ayudas: renombrar +1 ("Estado Ayudas") y suprimir +2
-            if (idxObrero !== -1) {
-                colsToDelete.add(idxObrero + 2);
-            }
+            // 4. Obrero Ayudas: la siguiente (+1) se renombra a "Estado Ayudas", la posterior (+2) se elimina
+            if (idxObrero !== -1) colsToDelete.add(idxObrero + 2);
 
-            // Bloques dinámicos especiales (4 grupos):
-            // 1. Contacto Inicial / Estado contacto / Detalle contacto (indices: idx, idx+1, idx+2)
-            // 2. Asignado a CFV / Estado CFV / Detalle CFV (indices: idx, idx+1, idx+2)
-            // 3. Registro Café / Estado CAFE / Detalle CAFE (indices: idx, idx+1, idx+2)
-            // 4. Conexión Efectiva / Estado conexion / Detalle conexion (indices: idx, idx+1, idx+2)
-
-            const specialBlockIndices = new Set();
+            // Bloques de 3 columnas para reordenar
             const getBlockIndices = (idx) => (idx !== -1 ? [idx, idx + 1, idx + 2] : []);
 
-            const contactoBlock = getBlockIndices(idxContacto);
-            const cfvBlock = getBlockIndices(idxCFV);
-            const cafeBlock = getBlockIndices(idxCafe);
-            const conexionBlock = getBlockIndices(idxConexion);
+            const contactoIndices = getBlockIndices(idxContacto);
+            const cfvIndices = getBlockIndices(idxCFV);
+            const cafeIndices = getBlockIndices(idxCafe);
+            const conexionIndices = getBlockIndices(idxConexion);
 
-            [...contactoBlock, ...cfvBlock, ...cafeBlock, ...conexionBlock].forEach(i => specialBlockIndices.add(i));
+            const allSpecialIndices = new Set([
+                ...contactoIndices,
+                ...cfvIndices,
+                ...cafeIndices,
+                ...conexionIndices
+            ]);
 
-            // Construir el orden final de índices de columnas
+            // Construcción del nuevo orden de columnas:
+            // Se añaden todas las columnas estándar que no sean especiales ni eliminadas
             const finalColumnIndices = [];
 
-            for (let i = 0; i < headers.length; i++) {
-                // Si es parte de los bloques especiales, se omiten aquí para insertarlos ordenadamente al final o en su posición requerida
-                if (specialBlockIndices.has(i)) continue;
-                // Si está en la lista de eliminadas
+            for (let i = 0; i < rawHeaders.length; i++) {
+                if (allSpecialIndices.has(i)) continue; // Se omiten aquí para insertarlas ordenadas
                 if (colsToDelete.has(i)) continue;
-
                 finalColumnIndices.push(i);
             }
 
-            // Insertar los 4 bloques en el orden solicitado al final del conjunto base de columnas
+            // Se insertan los 4 bloques ordenados exactamente según lo pedido
             const orderedSpecialIndices = [
-                ...contactoBlock,
-                ...cfvBlock,
-                ...cafeBlock,
-                ...conexionBlock
+                ...contactoIndices,
+                ...cfvIndices,
+                ...cafeIndices,
+                ...conexionIndices
             ];
 
-            const allTargetIndices = [...finalColumnIndices, ...orderedSpecialIndices];
+            const targetIndicesOrder = [...finalColumnIndices, ...orderedSpecialIndices];
 
-            // Reconstruir los datos fila por fila
-            const newRows = rows.map((row, rowIndex) => {
+            // Reconstrucción de la matriz con nombres de columnas actualizados
+            return rows.map((row, rowIndex) => {
                 const newRow = [];
 
-                allTargetIndices.forEach(colIdx => {
-                    let cellVal = row[colIdx] !== undefined ? row[colIdx] : "";
-                    
-                    // Aplicar renombres de encabezados en la fila 0
+                targetIndicesOrder.forEach(colIdx => {
+                    let val = row[colIdx] !== undefined ? row[colIdx] : "";
+
+                    // Aplicar nombres exactos a los encabezados (Fila 0)
                     if (rowIndex === 0) {
-                        if (idxCita !== -1 && colIdx === idxCita + 1) cellVal = "Estado Cita";
-                        if (idxEnForma !== -1 && colIdx === idxEnForma + 1) cellVal = "Estado EnForma";
-                        if (idxObrero !== -1 && colIdx === idxObrero + 1) cellVal = "Estado Ayudas";
+                        // Renombres específicos
+                        if (idxCita !== -1 && colIdx === idxCita + 1) val = "Estado Cita";
+                        if (idxEnForma !== -1 && colIdx === idxEnForma + 1) val = "Estado EnForma";
+                        if (idxObrero !== -1 && colIdx === idxObrero + 1) val = "Estado Ayudas";
 
-                        // Nombres exactos de bloques
-                        if (idxContacto !== -1 && colIdx === idxContacto + 1) cellVal = "Estado contacto";
-                        if (idxContacto !== -1 && colIdx === idxContacto + 2) cellVal = "Detalle contacto";
+                        // Bloque 1: Contacto Inicial
+                        if (idxContacto !== -1) {
+                            if (colIdx === idxContacto) val = "Contacto Inicial";
+                            if (colIdx === idxContacto + 1) val = "Estado contacto";
+                            if (colIdx === idxContacto + 2) val = "Detalle contacto";
+                        }
 
-                        if (idxCFV !== -1 && colIdx === idxCFV + 1) cellVal = "Estado CFV";
-                        if (idxCFV !== -1 && colIdx === idxCFV + 2) cellVal = "Detalle CFV";
+                        // Bloque 2: Asignado a CFV
+                        if (idxCFV !== -1) {
+                            if (colIdx === idxCFV) val = "Asignado a CFV";
+                            if (colIdx === idxCFV + 1) val = "Estado CFV";
+                            if (colIdx === idxCFV + 2) val = "Detalle CFV";
+                        }
 
-                        if (idxCafe !== -1 && colIdx === idxCafe + 1) cellVal = "Estado CAFE";
-                        if (idxCafe !== -1 && colIdx === idxCafe + 2) cellVal = "Detalle CAFE";
+                        // Bloque 3: Registro Café
+                        if (idxCafe !== -1) {
+                            if (colIdx === idxCafe) val = "Registro Café";
+                            if (colIdx === idxCafe + 1) val = "Estado CAFE";
+                            if (colIdx === idxCafe + 2) val = "Detalle CAFE";
+                        }
 
-                        if (idxConexion !== -1 && colIdx === idxConexion + 1) cellVal = "Estado conexion";
-                        if (idxConexion !== -1 && colIdx === idxConexion + 2) cellVal = "Detalle conexion";
+                        // Bloque 4: Conexión Efectiva
+                        if (idxConexion !== -1) {
+                            if (colIdx === idxConexion) val = "Conexión Efectiva";
+                            if (colIdx === idxConexion + 1) val = "Estado conexion";
+                            if (colIdx === idxConexion + 2) val = "Detalle conexion";
+                        }
                     }
 
-                    newRow.push(cellVal);
+                    newRow.push(sanitizeText(val));
                 });
 
                 return newRow;
             });
-
-            return newRows;
         }
 
-        // Botón de procesar y descargar
+        function processAndDisplay() {
+            if (!rawParsedData) return;
+            processedData = transformCSVData(rawParsedData);
+            renderPreview(processedData);
+        }
+
         processBtn.addEventListener('click', () => {
             if (!rawParsedData) return;
 
-            logMessage('Ejecutando transformación de campos...');
-            processedData = transformCSVData(rawParsedData);
+            logMessage('Generando y descargando CSV ajustado...');
+            processAndDisplay();
 
-            logMessage('Generando nuevo archivo CSV...', 'success');
-
-            // Renderizar Vista Previa
-            renderPreview(processedData);
-
-            // Generar descarga
             const csvOutput = Papa.unparse(processedData);
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' }); // UTF-8 BOM
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             
-            const newFileName = originalFileName.replace(/(\.csv|\.txt)$/i, '_ajustado.csv');
+            const originalName = originalFile ? originalFile.name : 'archivo.csv';
+            const newFileName = originalName.replace(/(\.csv|\.txt)$/i, '_ajustado.csv');
             
             link.href = URL.createObjectURL(blob);
             link.setAttribute('download', newFileName);
@@ -348,26 +432,29 @@
             link.click();
             document.body.removeChild(link);
 
-            logMessage(`¡Descarga completada! Archivo: ${newFileName}`, 'success');
+            logMessage(`¡Descarga lista! Archivo generado: ${newFileName}`, 'success');
         });
 
-        // Mostrar tabla con vista previa
         function renderPreview(data) {
             if (!data || data.length === 0) return;
 
-            previewTable.querySelector('thead').innerHTML = '';
-            previewTable.querySelector('tbody').innerHTML = '';
+            const thead = previewTable.querySelector('thead');
+            const tbody = previewTable.querySelector('tbody');
 
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Renderizar Headers
             const headerRow = document.createElement('tr');
-            data[0].forEach(headerText => {
+            data[0].forEach((headerText) => {
                 const th = document.createElement('th');
                 th.className = 'px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 border-b border-slate-200 whitespace-nowrap';
                 th.textContent = headerText;
                 headerRow.appendChild(th);
             });
-            previewTable.querySelector('thead').appendChild(headerRow);
+            thead.appendChild(headerRow);
 
-            // Mostrar max 5 filas
+            // Renderizar muestra de 5 filas
             const sampleRows = data.slice(1, 6);
             sampleRows.forEach(rowData => {
                 const tr = document.createElement('tr');
@@ -378,10 +465,10 @@
                     td.textContent = cellText;
                     tr.appendChild(td);
                 });
-                previewTable.querySelector('tbody').appendChild(tr);
+                tbody.appendChild(tr);
             });
 
-            rowCountBadge.textContent = `${data.length - 1} filas transformadas`;
+            rowCountBadge.textContent = `${data.length - 1} filas procesadas`;
             previewSection.classList.remove('hidden');
         }
     </script>
