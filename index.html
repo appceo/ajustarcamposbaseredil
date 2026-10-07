@@ -11,28 +11,53 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
 
     <!-- Header -->
     <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <i data-lucide="file-spreadsheet" class="w-8 h-8 text-indigo-200"></i>
-                <h1 class="text-2xl font-bold tracking-tight">Ajustador de Columnas CSV</h1>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Ajustador de Columnas CSV</h1>
+                    <p class="text-xs text-indigo-200">Procesamiento y Limpieza de Datos para Excel / GitHub Pages</p>
+                </div>
             </div>
-            <span class="text-xs bg-indigo-800 text-indigo-200 px-3 py-1 rounded-full font-medium">GitHub Pages Ready</span>
+            <span class="text-xs bg-indigo-800/80 border border-indigo-500/30 text-indigo-100 px-3 py-1 rounded-full font-medium shadow-sm">100% Local y Seguro</span>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-5xl w-full mx-auto px-4 py-8">
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
         
         <!-- Intro Card -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-            <h2 class="text-lg font-semibold text-slate-900 mb-2">Transformación y Limpieza de Datos</h2>
-            <p class="text-slate-600 text-sm leading-relaxed">
-                Esta herramienta procesa localmente en tu navegador el archivo separado por comas (CSV). Elimina columnas no requeridas, renombra los estados de seguimiento y reordena los bloques principales de <strong>Contacto Inicial</strong>, <strong>Asignado a CFV</strong>, <strong>Registro Café</strong> y <strong>Conexión Efectiva</strong>.
+            <h2 class="text-base font-semibold text-slate-900 mb-2 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
+                Procesamiento y Reordenamiento de Columnas
+            </h2>
+            <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                Esta aplicación procesa tu archivo CSV conservando todos los grupos de información pedidos. Modifica los encabezados de seguimiento, elimina las columnas no requeridas y asegura que las eñes (ñ) y tildes se mantengan limpias.
             </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+                <div>
+                    <span class="font-bold text-slate-700 block mb-1">❌ Supresiones Específicas:</span>
+                    <ul class="list-disc list-inside text-slate-600 space-y-0.5">
+                        <li><strong>Ingreso a la Iglesia:</strong> Elimina las 2 columnas contiguas (+1, +2).</li>
+                        <li><strong>Cita con Dios / EnForma / Obrero Ayudas:</strong> Renombra +1 a "Estado..." y elimina +2.</li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="font-bold text-slate-700 block mb-1">✅ Conservación y Reordenamiento (3 cols c/u):</span>
+                    <ul class="list-disc list-inside text-slate-600 space-y-0.5">
+                        <li><strong>Contacto Inicial</strong> / Estado contacto / Detalle contacto</li>
+                        <li><strong>Asignado a CFV</strong> / Estado CFV / Detalle CFV</li>
+                        <li><strong>Registro Café</strong> / Estado CAFE / Detalle CAFE</li>
+                        <li><strong>Conexión Efectiva</strong> / Estado conexion / Detalle conexion</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
         <!-- Upload & Process Section -->
@@ -40,37 +65,39 @@
             <!-- File Input Area -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label class="block text-sm font-medium text-slate-700">1. Seleccionar archivo CSV (.csv)</label>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="block text-sm font-medium text-slate-700">1. Seleccionar archivo CSV</label>
                         <!-- Selector de Codificación -->
-                        <div class="flex items-center space-x-1">
-                            <span class="text-xs text-slate-500">Codificación:</span>
-                            <select id="encoding-select" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <option value="ISO-8859-1" selected>ISO-8859-1 (Excel / Windows)</option>
+                        <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                            <span class="text-xs text-slate-600 font-medium pl-1">Codificación:</span>
+                            <select id="encoding-select" class="text-xs font-semibold border-0 rounded px-2 py-1 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                                <option value="ISO-8859-1" selected>ISO-8859-1 (Excel / Latin1)</option>
                                 <option value="UTF-8">UTF-8</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-slate-300 border-dashed rounded-lg hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative" id="drop-zone">
+                    <div class="mt-1 flex justify-center px-6 pt-6 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative group" id="drop-zone">
                         <input id="csv-file-input" type="file" accept=".csv, .txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
-                        <div class="space-y-1 text-center">
-                            <i data-lucide="upload-cloud" class="mx-auto h-12 w-12 text-slate-400"></i>
-                            <div class="flex text-sm text-slate-600 justify-center">
-                                <span class="font-medium text-indigo-600 hover:text-indigo-500">Haz clic para subir</span>
-                                <p class="pl-1">o arrastra el archivo</p>
+                        <div class="space-y-2 text-center">
+                            <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
                             </div>
-                            <p class="text-xs text-slate-500">Archivos CSV delimitados por comas</p>
+                            <div class="flex text-sm text-slate-600 justify-center">
+                                <span class="font-semibold text-indigo-600 hover:text-indigo-500">Haz clic para buscar</span>
+                                <p class="pl-1">o arrastra el archivo aquí</p>
+                            </div>
+                            <p class="text-xs text-slate-400">Archivos .csv o .txt delimitados por coma</p>
                         </div>
                     </div>
                 </div>
                 
-                <div id="file-info" class="mt-4 hidden p-3 bg-indigo-50 border border-indigo-100 rounded-lg flex items-center justify-between">
+                <div id="file-info" class="mt-4 hidden p-3 bg-indigo-50/80 border border-indigo-100 rounded-lg flex items-center justify-between">
                     <div class="flex items-center space-x-2 truncate">
                         <i data-lucide="file-text" class="w-5 h-5 text-indigo-600 flex-shrink-0"></i>
-                        <span id="file-name" class="text-xs font-medium text-indigo-900 truncate"></span>
+                        <span id="file-name" class="text-xs font-semibold text-indigo-950 truncate"></span>
                     </div>
-                    <span id="file-size" class="text-xs text-indigo-500 flex-shrink-0"></span>
+                    <span id="file-size" class="text-xs font-medium text-indigo-600 flex-shrink-0 bg-white px-2 py-0.5 rounded border border-indigo-200"></span>
                 </div>
             </div>
 
@@ -78,29 +105,43 @@
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
                     <h3 class="text-sm font-medium text-slate-700 mb-2">Estado del Procesamiento</h3>
-                    <div id="status-container" class="h-32 rounded-lg border border-slate-100 bg-slate-50 p-4 overflow-y-auto font-mono text-xs text-slate-600">
-                        <p class="text-slate-400 italic">Esperando que se cargue un archivo...</p>
+                    <div id="status-container" class="h-36 rounded-lg border border-slate-200 bg-slate-900 p-3 overflow-y-auto font-mono text-xs text-slate-200 leading-relaxed">
+                        <p class="text-slate-500 italic">> Esperando que selecciones un archivo CSV...</p>
                     </div>
                 </div>
 
-                <div class="mt-4 flex gap-3">
-                    <button id="process-btn" disabled class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 px-4 rounded-lg shadow-sm transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
-                        <i data-lucide="cog" class="w-4 h-4"></i>
-                        <span>Procesar y Descargar CSV</span>
+                <div class="mt-4">
+                    <button id="process-btn" disabled class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-xl shadow-md hover:shadow-indigo-200 transition-all disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center space-x-2">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        <span>Procesar y Descargar CSV Ajustado</span>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <!-- Structure Summary Badge List -->
+        <div id="structure-summary" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 hidden">
+            <h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
+                <i data-lucide="list-checks" class="w-4 h-4 text-emerald-600"></i>
+                Estructura Final Generada (<span id="total-cols-count">0</span> columnas)
+            </h3>
+            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 bg-slate-50 rounded-lg border border-slate-100">
+                <!-- Badges de columnas -->
             </div>
         </div>
 
         <!-- Preview Section -->
         <div id="preview-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-md font-semibold text-slate-900">Vista Previa del Resultado (primeras 5 filas)</h3>
-                <span id="row-count-badge" class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full font-medium"></span>
+                <div>
+                    <h3 class="text-base font-semibold text-slate-900">Vista Previa del Resultado</h3>
+                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas del archivo transformado</p>
+                </div>
+                <span id="row-count-badge" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-semibold"></span>
             </div>
-            <div class="overflow-x-auto border rounded-lg border-slate-200 max-h-96">
+            <div class="overflow-x-auto border rounded-xl border-slate-200 max-h-96 shadow-inner">
                 <table id="preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
-                    <thead class="bg-slate-50 sticky top-0 shadow-sm">
+                    <thead class="bg-slate-100 sticky top-0 shadow-sm">
                         <!-- Dynamic headers -->
                     </thead>
                     <tbody class="bg-white divide-y divide-slate-200 font-mono">
@@ -114,8 +155,9 @@
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-        <div class="max-w-5xl mx-auto px-4 text-center text-xs text-slate-500">
-            Ajustador de Archivos CSV &bull; Compatible con GitHub Pages &bull; Procesamiento 100% Privado en el Navegador
+        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500 flex items-center justify-between">
+            <span>Ajustador de Archivos CSV &bull; Compatible con GitHub Pages</span>
+            <span>Transformación 100% Cliente</span>
         </div>
     </footer>
 
@@ -135,17 +177,22 @@
         const previewTable = document.getElementById('preview-table');
         const rowCountBadge = document.getElementById('row-count-badge');
         const encodingSelect = document.getElementById('encoding-select');
+        const structureSummary = document.getElementById('structure-summary');
+        const colsBadges = document.getElementById('cols-badges');
+        const totalColsCount = document.getElementById('total-cols-count');
 
         let rawParsedData = null;
         let processedData = null;
         let originalFile = null;
 
-        // Log helper
+        // Logging UI
         function logMessage(msg, type = 'info') {
             const p = document.createElement('p');
-            if (type === 'error') p.className = 'text-red-600 font-semibold';
-            else if (type === 'success') p.className = 'text-emerald-600 font-semibold';
-            else p.className = 'text-slate-600';
+            p.className = 'font-mono text-xs py-0.5';
+            if (type === 'error') p.className += ' text-red-400 font-semibold';
+            else if (type === 'success') p.className += ' text-emerald-400 font-semibold';
+            else if (type === 'warn') p.className += ' text-amber-300';
+            else p.className += ' text-slate-300';
             
             p.textContent = `> ${msg}`;
             statusContainer.appendChild(p);
@@ -156,39 +203,38 @@
             statusContainer.innerHTML = '';
         }
 
-        // Reparación de caracteres corruptos (Tildes / Ñs dañadas)
+        // Limpieza profunda de caracteres corruptos (simbolo )
         function sanitizeText(str) {
-            if (typeof str !== 'string') return str;
+            if (str === null || str === undefined) return '';
+            let text = str.toString().trim();
 
-            let text = str;
-
-            // Reemplazos para caracteres corruptos comunes
-            const replacements = [
-                [/[\uFFFD\u001F\u007F-\u009F]/g, ''], // Eliminar caracteres invisibles/desconocidos
-                [/A\uFFFDos/g, 'Años'],
-                [/Aos\b/g, 'Años'],
-                [/Ort\uFFFDz/g, 'Ortíz'],
-                [/Ortz\b/g, 'Ortíz'],
-                [/Enr\uFFFDquez/g, 'Enríquez'],
-                [/Enrquez\b/g, 'Enríquez'],
-                [/N\uFFFDstor/g, 'Néstor'],
-                [/Nstor\b/g, 'Néstor'],
-                [/Monta\uFFFDa/g, 'Montaña'],
-                [/Montaa\b/g, 'Montaña'],
-                [/Informaci\uFFFDn/g, 'Información'],
-                [/Informacin\b/g, 'Información'],
-                [/Identificaci\uFFFDn/g, 'Identificación'],
-                [/Identificacin\b/g, 'Identificación'],
-                [/Tel\uFFFDfono/g, 'Teléfono'],
-                [/Telfono\b/g, 'Teléfono'],
-                [/M\uFFFDvil/g, 'Móvil'],
-                [/Mvil\b/g, 'Móvil'],
-                [/Conexi\uFFFDn/g, 'Conexión'],
-                [/Conexin\b/g, 'Conexión']
+            // Saneamiento de secuencias defectuosas de codificación
+            const fixes = [
+                [/[\uFFFD\u001F\u007F-\u009F]/g, ''], // Remover el caracter de reemplazo Unicode 
+                [/A\uFFFDos/gi, 'Años'],
+                [/Aos\b/gi, 'Años'],
+                [/Identificaci\uFFFDn/gi, 'Identificación'],
+                [/Identificacin\b/gi, 'Identificación'],
+                [/Informaci\uFFFDn/gi, 'Información'],
+                [/Informacin\b/gi, 'Información'],
+                [/Tel\uFFFDfono/gi, 'Teléfono'],
+                [/Telfono\b/gi, 'Teléfono'],
+                [/M\uFFFDvil/gi, 'Móvil'],
+                [/Mvil\b/gi, 'Móvil'],
+                [/Ort\uFFFDz/gi, 'Ortíz'],
+                [/Ortz\b/gi, 'Ortíz'],
+                [/Enr\uFFFDquez/gi, 'Enríquez'],
+                [/Enrquez\b/gi, 'Enríquez'],
+                [/N\uFFFDstor/gi, 'Néstor'],
+                [/Nstor\b/gi, 'Néstor'],
+                [/Monta\uFFFDa/gi, 'Montaña'],
+                [/Montaa\b/gi, 'Montaña'],
+                [/Conexi\uFFFDn/gi, 'Conexión'],
+                [/Conexin\b/gi, 'Conexión']
             ];
 
-            replacements.forEach(([pattern, replacement]) => {
-                text = text.replace(pattern, replacement);
+            fixes.forEach(([regex, replacement]) => {
+                text = text.replace(regex, replacement);
             });
 
             return text;
@@ -204,7 +250,7 @@
 
         encodingSelect.addEventListener('change', () => {
             if (originalFile) {
-                logMessage(`Cambiando codificación a: ${encodingSelect.value}`);
+                logMessage(`Re-leyendo archivo con codificación: ${encodingSelect.value}...`, 'warn');
                 handleFile(originalFile);
             }
         });
@@ -212,14 +258,14 @@
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
-                dropZone.classList.add('border-indigo-500', 'bg-indigo-50/50');
+                dropZone.classList.add('border-indigo-500', 'bg-indigo-50');
             }, false);
         });
 
         ['dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
-                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/50');
+                dropZone.classList.remove('border-indigo-500', 'bg-indigo-50');
             }, false);
         });
 
@@ -233,19 +279,13 @@
         });
 
         function handleFile(file) {
-            if (!file.name.endsWith('.csv') && !file.name.endsWith('.txt')) {
-                clearLog();
-                logMessage('Error: Selecciona un archivo .csv o .txt válido', 'error');
-                return;
-            }
-
             fileNameDisplay.textContent = file.name;
             fileSizeDisplay.textContent = (file.size / 1024).toFixed(1) + ' KB';
             fileInfo.classList.remove('hidden');
 
             clearLog();
-            logMessage(`Archivo seleccionado: ${file.name}`);
-            logMessage(`Leyendo con codificación: ${encodingSelect.value}...`);
+            logMessage(`Cargando: ${file.name}`);
+            logMessage(`Codificación seleccionada: ${encodingSelect.value}`);
 
             const reader = new FileReader();
             reader.onload = function(evt) {
@@ -255,18 +295,24 @@
                     header: false,
                     skipEmptyLines: true,
                     complete: function(results) {
-                        // Aplicar limpieza de texto inmediata a todos los registros
+                        if (!results.data || results.data.length === 0) {
+                            logMessage('El archivo parece estar vacío.', 'error');
+                            return;
+                        }
+
+                        // Limpiar celdas al importar
                         rawParsedData = results.data.map(row => 
-                            row.map(cell => sanitizeText((cell || '').toString().trim()))
+                            row.map(cell => sanitizeText(cell))
                         );
-                        logMessage(`Archivo leído correctamente. Total filas: ${rawParsedData.length}`, 'success');
+
+                        logMessage(`Lectura exitosa: ${rawParsedData.length} filas detectadas.`, 'success');
                         processBtn.disabled = false;
                         
-                        // Procesar y mostrar vista previa automáticamente
+                        // Transformar e inspeccionar inmediatamente
                         processAndDisplay();
                     },
                     error: function(err) {
-                        logMessage(`Error al leer archivo: ${err.message}`, 'error');
+                        logMessage(`Error al procesar CSV: ${err.message}`, 'error');
                     }
                 });
             };
@@ -278,129 +324,133 @@
             if (!str) return '';
             return str.toString()
                 .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quitar tildes para comparación flexible
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizar tildes
+                .replace(/[^a-z0-9]/g, '') // Dejar solo alfanumérico para match exacto
                 .trim();
         }
 
         function transformCSVData(rows) {
             if (!rows || rows.length === 0) return [];
 
-            const rawHeaders = rows[0];
-            const normalizedHeaders = rawHeaders.map(normalizeHeader);
+            const originalHeaders = rows[0];
+            const normalizedHeaders = originalHeaders.map(normalizeHeader);
 
-            function findColIdx(name) {
-                const normTarget = normalizeHeader(name);
-                return normalizedHeaders.findIndex(h => h.includes(normTarget));
+            // Función de búsqueda flexible de columnas por nombre
+            function findColIndex(targetName) {
+                const targetNorm = normalizeHeader(targetName);
+                return normalizedHeaders.findIndex(h => h.includes(targetNorm));
             }
 
-            // Índices base
-            const idxIngreso = findColIdx('ingreso a la iglesia');
-            const idxCita = findColIdx('cita con dios');
-            const idxEnForma = findColIdx('enforma');
-            const idxObrero = findColIdx('obrero ayudas');
+            // 1. Localizar los índices base en la cabecera original
+            const idxIngreso = findColIndex('ingresoalaiglesia');
+            const idxCita = findColIndex('citacondios');
+            const idxEnForma = findColIndex('enforma');
+            const idxObrero = findColIndex('obreroayudas');
 
-            const idxContacto = findColIdx('contacto inicial');
-            const idxCFV = findColIdx('asignado a cfv');
-            const idxCafe = findColIdx('registro cafe');
-            const idxConexion = findColIdx('conexion efectiva');
+            const idxContacto = findColIndex('contactoinicial');
+            const idxCFV = findColIndex('asignadoacfv');
+            const idxCafe = findColIndex('registrocafe');
+            const idxConexion = findColIndex('conexionefectiva');
 
-            // Determinar columnas a eliminar
+            logMessage(`Índices encontrados -> Contacto: ${idxContacto}, CFV: ${idxCFV}, Café: ${idxCafe}, Conexión: ${idxConexion}`);
+
+            // 2. Definir las columnas a ELIMINAR expresamente:
             const colsToDelete = new Set();
 
-            // 1. Dos columnas contiguas a "Ingreso a la Iglesia"
+            // a. Ingreso a la Iglesia: suprimir sus dos columnas contiguas a la derecha (+1, +2)
             if (idxIngreso !== -1) {
                 colsToDelete.add(idxIngreso + 1);
                 colsToDelete.add(idxIngreso + 2);
             }
 
-            // 2. Cita con Dios: la siguiente (+1) se renombra a "Estado Cita", la posterior (+2) se elimina
+            // b. Cita con Dios: la +1 se renombra, la +2 se elimina
             if (idxCita !== -1) colsToDelete.add(idxCita + 2);
 
-            // 3. EnForma: la siguiente (+1) se renombra a "Estado EnForma", la posterior (+2) se elimina
+            // c. EnForma: la +1 se renombra, la +2 se elimina
             if (idxEnForma !== -1) colsToDelete.add(idxEnForma + 2);
 
-            // 4. Obrero Ayudas: la siguiente (+1) se renombra a "Estado Ayudas", la posterior (+2) se elimina
+            // d. Obrero Ayudas: la +1 se renombra, la +2 se elimina
             if (idxObrero !== -1) colsToDelete.add(idxObrero + 2);
 
-            // Bloques de 3 columnas para reordenar
-            const getBlockIndices = (idx) => (idx !== -1 ? [idx, idx + 1, idx + 2] : []);
+            // 3. Identificar los bloques de los 4 GRUPOS PRINCIPALES (base +1 +2)
+            const getGroupIndices = (idx) => (idx !== -1 ? [idx, idx + 1, idx + 2] : []);
 
-            const contactoIndices = getBlockIndices(idxContacto);
-            const cfvIndices = getBlockIndices(idxCFV);
-            const cafeIndices = getBlockIndices(idxCafe);
-            const conexionIndices = getBlockIndices(idxConexion);
+            const groupContacto = getGroupIndices(idxContacto);
+            const groupCFV = getGroupIndices(idxCFV);
+            const groupCafe = getGroupIndices(idxCafe);
+            const groupConexion = getGroupIndices(idxConexion);
 
-            const allSpecialIndices = new Set([
-                ...contactoIndices,
-                ...cfvIndices,
-                ...cafeIndices,
-                ...conexionIndices
+            // Conjunto de todos los índices que forman parte de los 4 grupos principales
+            const mainGroupsIndicesSet = new Set([
+                ...groupContacto,
+                ...groupCFV,
+                ...groupCafe,
+                ...groupConexion
             ]);
 
-            // Construcción del nuevo orden de columnas:
-            // Se añaden todas las columnas estándar que no sean especiales ni eliminadas
-            const finalColumnIndices = [];
+            // 4. Construir el nuevo orden global de índices de columna
+            const remainingColumnsIndices = [];
 
-            for (let i = 0; i < rawHeaders.length; i++) {
-                if (allSpecialIndices.has(i)) continue; // Se omiten aquí para insertarlas ordenadas
+            // Añadir todas las columnas regulares que NO estén eliminadas ni pertenezcan a los 4 grupos
+            for (let i = 0; i < originalHeaders.length; i++) {
                 if (colsToDelete.has(i)) continue;
-                finalColumnIndices.push(i);
+                if (mainGroupsIndicesSet.has(i)) continue; // Se reservan para colocarlas ordenadas
+                remainingColumnsIndices.push(i);
             }
 
-            // Se insertan los 4 bloques ordenados exactamente según lo pedido
-            const orderedSpecialIndices = [
-                ...contactoIndices,
-                ...cfvIndices,
-                ...cafeIndices,
-                ...conexionIndices
+            // Unir las columnas generales con los 4 GRUPOS REORDENADOS
+            const finalIndicesOrder = [
+                ...remainingColumnsIndices,
+                ...groupContacto,
+                ...groupCFV,
+                ...groupCafe,
+                ...groupConexion
             ];
 
-            const targetIndicesOrder = [...finalColumnIndices, ...orderedSpecialIndices];
-
-            // Reconstrucción de la matriz con nombres de columnas actualizados
+            // 5. Construir la nueva matriz de datos transformando encabezados y celdas
             return rows.map((row, rowIndex) => {
                 const newRow = [];
 
-                targetIndicesOrder.forEach(colIdx => {
-                    let val = row[colIdx] !== undefined ? row[colIdx] : "";
+                finalIndicesOrder.forEach((colIdx) => {
+                    let cellVal = row[colIdx] !== undefined ? row[colIdx] : '';
 
-                    // Aplicar nombres exactos a los encabezados (Fila 0)
+                    // Si es la fila de encabezados (Fila 0), asignar nombres exactos
                     if (rowIndex === 0) {
-                        // Renombres específicos
-                        if (idxCita !== -1 && colIdx === idxCita + 1) val = "Estado Cita";
-                        if (idxEnForma !== -1 && colIdx === idxEnForma + 1) val = "Estado EnForma";
-                        if (idxObrero !== -1 && colIdx === idxObrero + 1) val = "Estado Ayudas";
+                        // Renombres de supresión parcial
+                        if (idxCita !== -1 && colIdx === idxCita + 1) cellVal = "Estado Cita";
+                        if (idxEnForma !== -1 && colIdx === idxEnForma + 1) cellVal = "Estado EnForma";
+                        if (idxObrero !== -1 && colIdx === idxObrero + 1) cellVal = "Estado Ayudas";
 
-                        // Bloque 1: Contacto Inicial
+                        // Grupo 1: Contacto Inicial
                         if (idxContacto !== -1) {
-                            if (colIdx === idxContacto) val = "Contacto Inicial";
-                            if (colIdx === idxContacto + 1) val = "Estado contacto";
-                            if (colIdx === idxContacto + 2) val = "Detalle contacto";
+                            if (colIdx === idxContacto) cellVal = "Contacto Inicial";
+                            if (colIdx === idxContacto + 1) cellVal = "Estado contacto";
+                            if (colIdx === idxContacto + 2) cellVal = "Detalle contacto";
                         }
 
-                        // Bloque 2: Asignado a CFV
+                        // Grupo 2: Asignado a CFV
                         if (idxCFV !== -1) {
-                            if (colIdx === idxCFV) val = "Asignado a CFV";
-                            if (colIdx === idxCFV + 1) val = "Estado CFV";
-                            if (colIdx === idxCFV + 2) val = "Detalle CFV";
+                            if (colIdx === idxCFV) cellVal = "Asignado a CFV";
+                            if (colIdx === idxCFV + 1) cellVal = "Estado CFV";
+                            if (colIdx === idxCFV + 2) cellVal = "Detalle CFV";
                         }
 
-                        // Bloque 3: Registro Café
+                        // Grupo 3: Registro Café
                         if (idxCafe !== -1) {
-                            if (colIdx === idxCafe) val = "Registro Café";
-                            if (colIdx === idxCafe + 1) val = "Estado CAFE";
-                            if (colIdx === idxCafe + 2) val = "Detalle CAFE";
+                            if (colIdx === idxCafe) cellVal = "Registro Café";
+                            if (colIdx === idxCafe + 1) cellVal = "Estado CAFE";
+                            if (colIdx === idxCafe + 2) cellVal = "Detalle CAFE";
                         }
 
-                        // Bloque 4: Conexión Efectiva
+                        // Grupo 4: Conexión Efectiva
                         if (idxConexion !== -1) {
-                            if (colIdx === idxConexion) val = "Conexión Efectiva";
-                            if (colIdx === idxConexion + 1) val = "Estado conexion";
-                            if (colIdx === idxConexion + 2) val = "Detalle conexion";
+                            if (colIdx === idxConexion) cellVal = "Conexión Efectiva";
+                            if (colIdx === idxConexion + 1) cellVal = "Estado conexion";
+                            if (colIdx === idxConexion + 2) cellVal = "Detalle conexion";
                         }
                     }
 
-                    newRow.push(sanitizeText(val));
+                    newRow.push(sanitizeText(cellVal));
                 });
 
                 return newRow;
@@ -409,31 +459,42 @@
 
         function processAndDisplay() {
             if (!rawParsedData) return;
+
             processedData = transformCSVData(rawParsedData);
+            logMessage(`Transformación completada. Columnas resultantes: ${processedData[0].length}`, 'success');
+
+            renderStructureSummary(processedData[0]);
             renderPreview(processedData);
         }
 
-        processBtn.addEventListener('click', () => {
-            if (!rawParsedData) return;
+        function renderStructureSummary(headers) {
+            colsBadges.innerHTML = '';
+            totalColsCount.textContent = headers.length;
 
-            logMessage('Generando y descargando CSV ajustado...');
-            processAndDisplay();
+            const specialNames = [
+                'Contacto Inicial', 'Estado contacto', 'Detalle contacto',
+                'Asignado a CFV', 'Estado CFV', 'Detalle CFV',
+                'Registro Café', 'Estado CAFE', 'Detalle CAFE',
+                'Conexión Efectiva', 'Estado conexion', 'Detalle conexion',
+                'Estado Cita', 'Estado EnForma', 'Estado Ayudas'
+            ];
 
-            const csvOutput = Papa.unparse(processedData);
-            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            
-            const originalName = originalFile ? originalFile.name : 'archivo.csv';
-            const newFileName = originalName.replace(/(\.csv|\.txt)$/i, '_ajustado.csv');
-            
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', newFileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            headers.forEach((h, index) => {
+                const badge = document.createElement('span');
+                const isSpecial = specialNames.includes(h);
 
-            logMessage(`¡Descarga lista! Archivo generado: ${newFileName}`, 'success');
-        });
+                if (isSpecial) {
+                    badge.className = 'px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-100 text-indigo-800 border border-indigo-300';
+                } else {
+                    badge.className = 'px-2 py-0.5 rounded text-[11px] font-medium bg-white text-slate-600 border border-slate-200';
+                }
+
+                badge.textContent = `${index + 1}. ${h}`;
+                colsBadges.appendChild(badge);
+            });
+
+            structureSummary.classList.remove('hidden');
+        }
 
         function renderPreview(data) {
             if (!data || data.length === 0) return;
@@ -444,33 +505,59 @@
             thead.innerHTML = '';
             tbody.innerHTML = '';
 
-            // Renderizar Headers
+            // Encabezados
             const headerRow = document.createElement('tr');
             data[0].forEach((headerText) => {
                 const th = document.createElement('th');
-                th.className = 'px-3 py-2 text-left font-semibold text-slate-700 bg-slate-100 border-b border-slate-200 whitespace-nowrap';
+                th.className = 'px-3 py-2.5 text-left font-semibold text-slate-800 bg-slate-100/80 border-b border-slate-200 whitespace-nowrap';
                 th.textContent = headerText;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
 
-            // Renderizar muestra de 5 filas
+            // Primeras 5 filas
             const sampleRows = data.slice(1, 6);
             sampleRows.forEach(rowData => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50';
+                tr.className = 'hover:bg-indigo-50/30 transition-colors';
                 rowData.forEach(cellText => {
                     const td = document.createElement('td');
-                    td.className = 'px-3 py-2 border-b border-slate-100 whitespace-nowrap text-slate-600';
+                    td.className = 'px-3 py-2 border-b border-slate-100 whitespace-nowrap text-slate-700 text-xs';
                     td.textContent = cellText;
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
             });
 
-            rowCountBadge.textContent = `${data.length - 1} filas procesadas`;
+            rowCountBadge.textContent = `${data.length - 1} filas listas`;
             previewSection.classList.remove('hidden');
         }
+
+        processBtn.addEventListener('click', () => {
+            if (!processedData) return;
+
+            logMessage('Generando archivo CSV final con UTF-8 BOM...');
+            
+            // Re-procesar para asegurar últimos datos
+            processedData = transformCSVData(rawParsedData);
+
+            const csvOutput = Papa.unparse(processedData);
+            
+            // Agregar UTF-8 BOM (\uFEFF) para forzar a Excel a abrir correctamente eñes y tildes
+            const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
+            
+            const originalName = originalFile ? originalFile.name : 'archivo.csv';
+            const newFileName = originalName.replace(/(\.csv|\.txt)$/i, '_ajustado.csv');
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', newFileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            logMessage(`¡Descarga iniciada! Nombre: ${newFileName}`, 'success');
+        });
     </script>
 </body>
 </html>
