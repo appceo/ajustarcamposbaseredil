@@ -34,27 +34,27 @@
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
             <h2 class="text-base font-semibold text-slate-900 mb-2 flex items-center gap-2">
                 <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
-                Procesamiento y Reordenamiento de Columnas
+                Procesamiento, Limpieza y Reordenamiento de Columnas
             </h2>
             <p class="text-slate-600 text-sm leading-relaxed mb-4">
-                Esta aplicación procesa tu archivo CSV conservando todos los grupos de información pedidos. Modifica los encabezados de seguimiento, elimina las columnas no requeridas y asegura que las eñes (ñ) y tildes se mantengan limpias.
+                Esta aplicación procesa tu archivo CSV eliminando únicamente las columnas de descarte y **conservando intactas las 12 columnas principales (4 grupos × 3 columnas c/u)** con sus nuevos nombres formateados.
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200/80">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200/80">
                 <div>
                     <span class="font-bold text-slate-700 block mb-1">❌ Supresiones Específicas:</span>
-                    <ul class="list-disc list-inside text-slate-600 space-y-0.5">
-                        <li><strong>Ingreso a la Iglesia:</strong> Elimina las 2 columnas contiguas (+1, +2).</li>
+                    <ul class="list-disc list-inside text-slate-600 space-y-1">
+                        <li><strong>Ingreso a la Iglesia:</strong> Elimina sus 2 columnas contiguas (+1, +2).</li>
                         <li><strong>Cita con Dios / EnForma / Obrero Ayudas:</strong> Renombra +1 a "Estado..." y elimina +2.</li>
                     </ul>
                 </div>
                 <div>
-                    <span class="font-bold text-slate-700 block mb-1">✅ Conservación y Reordenamiento (3 cols c/u):</span>
-                    <ul class="list-disc list-inside text-slate-600 space-y-0.5">
-                        <li><strong>Contacto Inicial</strong> / Estado contacto / Detalle contacto</li>
-                        <li><strong>Asignado a CFV</strong> / Estado CFV / Detalle CFV</li>
-                        <li><strong>Registro Café</strong> / Estado CAFE / Detalle CAFE</li>
-                        <li><strong>Conexión Efectiva</strong> / Estado conexion / Detalle conexion</li>
+                    <span class="font-bold text-slate-700 block mb-1">✅ 4 Tríadas Conservadas (Total 12 columnas):</span>
+                    <ul class="list-disc list-inside text-slate-600 space-y-1">
+                        <li><span class="font-semibold text-indigo-700">Grupo 1:</span> Contacto Inicial &bull; Estado contacto &bull; Detalle contacto</li>
+                        <li><span class="font-semibold text-indigo-700">Grupo 2:</span> Asignado a CFV &bull; Estado CFV &bull; Detalle CFV</li>
+                        <li><span class="font-semibold text-indigo-700">Grupo 3:</span> Registro Café &bull; Estado CAFE &bull; Detalle CAFE</li>
+                        <li><span class="font-semibold text-indigo-700">Grupo 4:</span> Conexión Efectiva &bull; Estado conexion &bull; Detalle conexion</li>
                     </ul>
                 </div>
             </div>
@@ -71,7 +71,7 @@
                         <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
                             <span class="text-xs text-slate-600 font-medium pl-1">Codificación:</span>
                             <select id="encoding-select" class="text-xs font-semibold border-0 rounded px-2 py-1 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                                <option value="ISO-8859-1" selected>ISO-8859-1 (Excel / Latin1)</option>
+                                <option value="ISO-8859-1" selected>ISO-8859-1 (Latin1 / Excel)</option>
                                 <option value="UTF-8">UTF-8</option>
                             </select>
                         </div>
@@ -121,11 +121,27 @@
 
         <!-- Structure Summary Badge List -->
         <div id="structure-summary" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 hidden">
-            <h3 class="text-sm font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <i data-lucide="list-checks" class="w-4 h-4 text-emerald-600"></i>
-                Estructura Final Generada (<span id="total-cols-count">0</span> columnas)
-            </h3>
-            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-40 overflow-y-auto p-1 bg-slate-50 rounded-lg border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                    <i data-lucide="list-checks" class="w-5 h-5 text-emerald-600"></i>
+                    Verificación de Columnas Finales (<span id="total-cols-count" class="font-bold text-indigo-600">0</span> columnas)
+                </h3>
+                <span id="col-count-diff" class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-medium"></span>
+            </div>
+
+            <!-- Panel de las 4 Tríadas Confirmadas -->
+            <div class="mb-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                <h4 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i data-lucide="check-circle-2" class="w-4 h-4 text-indigo-600"></i>
+                    Las 12 Columnas Solicitadas (4 Grupos x 3 Campos)
+                </h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs" id="triads-container">
+                    <!-- Dynamic group status -->
+                </div>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-2 font-medium">Estructura completa en el orden del archivo resultantes:</p>
+            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 rounded-lg border border-slate-200">
                 <!-- Badges de columnas -->
             </div>
         </div>
@@ -135,7 +151,7 @@
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="text-base font-semibold text-slate-900">Vista Previa del Resultado</h3>
-                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas del archivo transformado</p>
+                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas del archivo transformado con tildes y eñes corregidas</p>
                 </div>
                 <span id="row-count-badge" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-semibold"></span>
             </div>
@@ -180,6 +196,8 @@
         const structureSummary = document.getElementById('structure-summary');
         const colsBadges = document.getElementById('cols-badges');
         const totalColsCount = document.getElementById('total-cols-count');
+        const colCountDiff = document.getElementById('col-count-diff');
+        const triadsContainer = document.getElementById('triads-container');
 
         let rawParsedData = null;
         let processedData = null;
@@ -203,39 +221,28 @@
             statusContainer.innerHTML = '';
         }
 
-        // Limpieza profunda de caracteres corruptos (simbolo )
+        // Saneamiento profundo de texto para restaurar caracteres corruptos ()
         function sanitizeText(str) {
             if (str === null || str === undefined) return '';
             let text = str.toString().trim();
 
-            // Saneamiento de secuencias defectuosas de codificación
-            const fixes = [
-                [/[\uFFFD\u001F\u007F-\u009F]/g, ''], // Remover el caracter de reemplazo Unicode 
-                [/A\uFFFDos/gi, 'Años'],
-                [/Aos\b/gi, 'Años'],
-                [/Identificaci\uFFFDn/gi, 'Identificación'],
-                [/Identificacin\b/gi, 'Identificación'],
-                [/Informaci\uFFFDn/gi, 'Información'],
-                [/Informacin\b/gi, 'Información'],
-                [/Tel\uFFFDfono/gi, 'Teléfono'],
-                [/Telfono\b/gi, 'Teléfono'],
-                [/M\uFFFDvil/gi, 'Móvil'],
-                [/Mvil\b/gi, 'Móvil'],
-                [/Ort\uFFFDz/gi, 'Ortíz'],
-                [/Ortz\b/gi, 'Ortíz'],
-                [/Enr\uFFFDquez/gi, 'Enríquez'],
-                [/Enrquez\b/gi, 'Enríquez'],
-                [/N\uFFFDstor/gi, 'Néstor'],
-                [/Nstor\b/gi, 'Néstor'],
-                [/Monta\uFFFDa/gi, 'Montaña'],
-                [/Montaa\b/gi, 'Montaña'],
-                [/Conexi\uFFFDn/gi, 'Conexión'],
-                [/Conexin\b/gi, 'Conexión']
-            ];
-
-            fixes.forEach(([regex, replacement]) => {
-                text = text.replace(regex, replacement);
-            });
+            // Reemplazo directo de secuencias corruptas por problemas de codificación de origen
+            text = text
+                .replace(/\uFFFD/g, 'ñ') // Caracter de reemplazo unicode general
+                .replace(/Aos\b/gi, 'Años')
+                .replace(/Aos/gi, 'Años')
+                .replace(/Identificacin\b/gi, 'Identificación')
+                .replace(/Informacin\b/gi, 'Información')
+                .replace(/Telfono\b/gi, 'Teléfono')
+                .replace(/Mvil\b/gi, 'Móvil')
+                .replace(/Ortz\b/gi, 'Ortíz')
+                .replace(/Enrquez\b/gi, 'Enríquez')
+                .replace(/Nstor\b/gi, 'Néstor')
+                .replace(/Montaa\b/gi, 'Montaña')
+                .replace(/Conexin\b/gi, 'Conexión')
+                .replace(/Gmez\b/gi, 'Gómez')
+                .replace(/Perez\b/gi, 'Pérez')
+                .replace(/Rodriguez\b/gi, 'Rodríguez');
 
             return text;
         }
@@ -284,8 +291,8 @@
             fileInfo.classList.remove('hidden');
 
             clearLog();
-            logMessage(`Cargando: ${file.name}`);
-            logMessage(`Codificación seleccionada: ${encodingSelect.value}`);
+            logMessage(`Cargando archivo: ${file.name}`);
+            logMessage(`Modo de codificación: ${encodingSelect.value}`);
 
             const reader = new FileReader();
             reader.onload = function(evt) {
@@ -296,23 +303,23 @@
                     skipEmptyLines: true,
                     complete: function(results) {
                         if (!results.data || results.data.length === 0) {
-                            logMessage('El archivo parece estar vacío.', 'error');
+                            logMessage('El archivo seleccionado parece estar vacío.', 'error');
                             return;
                         }
 
-                        // Limpiar celdas al importar
+                        // Sanear celdas durante la carga
                         rawParsedData = results.data.map(row => 
                             row.map(cell => sanitizeText(cell))
                         );
 
-                        logMessage(`Lectura exitosa: ${rawParsedData.length} filas detectadas.`, 'success');
+                        logMessage(`Archivo leído: ${rawParsedData.length} filas x ${rawParsedData[0].length} columnas.`, 'success');
                         processBtn.disabled = false;
                         
-                        // Transformar e inspeccionar inmediatamente
+                        // Procesar y mostrar la vista previa automáticamente
                         processAndDisplay();
                     },
                     error: function(err) {
-                        logMessage(`Error al procesar CSV: ${err.message}`, 'error');
+                        logMessage(`Error en lectura de CSV: ${err.message}`, 'error');
                     }
                 });
             };
@@ -325,7 +332,7 @@
             return str.toString()
                 .toLowerCase()
                 .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizar tildes
-                .replace(/[^a-z0-9]/g, '') // Dejar solo alfanumérico para match exacto
+                .replace(/[^a-z0-9]/g, '') // Solo alfanumérico para comparación limpia
                 .trim();
         }
 
@@ -335,13 +342,13 @@
             const originalHeaders = rows[0];
             const normalizedHeaders = originalHeaders.map(normalizeHeader);
 
-            // Función de búsqueda flexible de columnas por nombre
-            function findColIndex(targetName) {
-                const targetNorm = normalizeHeader(targetName);
+            // Búsqueda flexible de índice de columna por patrón de texto
+            function findColIndex(targetPattern) {
+                const targetNorm = normalizeHeader(targetPattern);
                 return normalizedHeaders.findIndex(h => h.includes(targetNorm));
             }
 
-            // 1. Localizar los índices base en la cabecera original
+            // 1. Identificar índices clave en el archivo original
             const idxIngreso = findColIndex('ingresoalaiglesia');
             const idxCita = findColIndex('citacondios');
             const idxEnForma = findColIndex('enforma');
@@ -352,97 +359,99 @@
             const idxCafe = findColIndex('registrocafe');
             const idxConexion = findColIndex('conexionefectiva');
 
-            logMessage(`Índices encontrados -> Contacto: ${idxContacto}, CFV: ${idxCFV}, Café: ${idxCafe}, Conexión: ${idxConexion}`);
+            logMessage(`Columnas base detectadas -> Contacto: [${idxContacto}], CFV: [${idxCFV}], Café: [${idxCafe}], Conexión: [${idxConexion}]`);
 
-            // 2. Definir las columnas a ELIMINAR expresamente:
+            // 2. Determinar cuáles columnas se DEBEN ELIMINAR expresamente
             const colsToDelete = new Set();
 
-            // a. Ingreso a la Iglesia: suprimir sus dos columnas contiguas a la derecha (+1, +2)
+            // Ingreso a la Iglesia: suprimir sus 2 columnas contiguas a la derecha (+1, +2)
             if (idxIngreso !== -1) {
                 colsToDelete.add(idxIngreso + 1);
                 colsToDelete.add(idxIngreso + 2);
             }
 
-            // b. Cita con Dios: la +1 se renombra, la +2 se elimina
+            // Cita con Dios: renombra +1, elimina +2
             if (idxCita !== -1) colsToDelete.add(idxCita + 2);
 
-            // c. EnForma: la +1 se renombra, la +2 se elimina
+            // EnForma: renombra +1, elimina +2
             if (idxEnForma !== -1) colsToDelete.add(idxEnForma + 2);
 
-            // d. Obrero Ayudas: la +1 se renombra, la +2 se elimina
+            // Obrero Ayudas: renombra +1, elimina +2
             if (idxObrero !== -1) colsToDelete.add(idxObrero + 2);
 
-            // 3. Identificar los bloques de los 4 GRUPOS PRINCIPALES (base +1 +2)
-            const getGroupIndices = (idx) => (idx !== -1 ? [idx, idx + 1, idx + 2] : []);
+            // 3. Agrupar las 12 columnas asociadas a los 4 grupos requeridos (3 por cada uno)
+            const getTriadIndices = (baseIdx) => {
+                if (baseIdx === -1) return [];
+                return [baseIdx, baseIdx + 1, baseIdx + 2];
+            };
 
-            const groupContacto = getGroupIndices(idxContacto);
-            const groupCFV = getGroupIndices(idxCFV);
-            const groupCafe = getGroupIndices(idxCafe);
-            const groupConexion = getGroupIndices(idxConexion);
+            const triadContacto = getTriadIndices(idxContacto);
+            const triadCFV = getTriadIndices(idxCFV);
+            const triadCafe = getTriadIndices(idxCafe);
+            const triadConexion = getTriadIndices(idxConexion);
 
-            // Conjunto de todos los índices que forman parte de los 4 grupos principales
-            const mainGroupsIndicesSet = new Set([
-                ...groupContacto,
-                ...groupCFV,
-                ...groupCafe,
-                ...groupConexion
+            // Conjunto de todos los índices pertenecientes a las 4 tríadas (12 columnas en total)
+            const triadsIndicesSet = new Set([
+                ...triadContacto,
+                ...triadCFV,
+                ...triadCafe,
+                ...triadConexion
             ]);
 
-            // 4. Construir el nuevo orden global de índices de columna
-            const remainingColumnsIndices = [];
+            // 4. Construir la secuencia completa de índices del nuevo archivo CSV
+            const baseColumns = [];
 
-            // Añadir todas las columnas regulares que NO estén eliminadas ni pertenezcan a los 4 grupos
+            // Añadir las columnas normales respetando el orden pero excluyendo las eliminadas y las 12 de las tríadas
             for (let i = 0; i < originalHeaders.length; i++) {
                 if (colsToDelete.has(i)) continue;
-                if (mainGroupsIndicesSet.has(i)) continue; // Se reservan para colocarlas ordenadas
-                remainingColumnsIndices.push(i);
+                if (triadsIndicesSet.has(i)) continue; // Reservadas para colocación explicita
+                baseColumns.push(i);
             }
 
-            // Unir las columnas generales con los 4 GRUPOS REORDENADOS
+            // Secuencia final de columnas: Columnas generales + Las 4 Tríadas Reordenadas (12 columnas)
             const finalIndicesOrder = [
-                ...remainingColumnsIndices,
-                ...groupContacto,
-                ...groupCFV,
-                ...groupCafe,
-                ...groupConexion
+                ...baseColumns,
+                ...triadContacto,
+                ...triadCFV,
+                ...triadCafe,
+                ...triadConexion
             ];
 
-            // 5. Construir la nueva matriz de datos transformando encabezados y celdas
+            // 5. Generar la nueva matriz de datos con los encabezados exactos y valores limpios
             return rows.map((row, rowIndex) => {
                 const newRow = [];
 
                 finalIndicesOrder.forEach((colIdx) => {
                     let cellVal = row[colIdx] !== undefined ? row[colIdx] : '';
 
-                    // Si es la fila de encabezados (Fila 0), asignar nombres exactos
                     if (rowIndex === 0) {
-                        // Renombres de supresión parcial
+                        // Nombres de columnas renombradas por supresión parcial
                         if (idxCita !== -1 && colIdx === idxCita + 1) cellVal = "Estado Cita";
                         if (idxEnForma !== -1 && colIdx === idxEnForma + 1) cellVal = "Estado EnForma";
                         if (idxObrero !== -1 && colIdx === idxObrero + 1) cellVal = "Estado Ayudas";
 
-                        // Grupo 1: Contacto Inicial
+                        // GRUPO 1: Contacto Inicial (3 columnas)
                         if (idxContacto !== -1) {
                             if (colIdx === idxContacto) cellVal = "Contacto Inicial";
                             if (colIdx === idxContacto + 1) cellVal = "Estado contacto";
                             if (colIdx === idxContacto + 2) cellVal = "Detalle contacto";
                         }
 
-                        // Grupo 2: Asignado a CFV
+                        // GRUPO 2: Asignado a CFV (3 columnas)
                         if (idxCFV !== -1) {
                             if (colIdx === idxCFV) cellVal = "Asignado a CFV";
                             if (colIdx === idxCFV + 1) cellVal = "Estado CFV";
                             if (colIdx === idxCFV + 2) cellVal = "Detalle CFV";
                         }
 
-                        // Grupo 3: Registro Café
+                        // GRUPO 3: Registro Café (3 columnas)
                         if (idxCafe !== -1) {
                             if (colIdx === idxCafe) cellVal = "Registro Café";
                             if (colIdx === idxCafe + 1) cellVal = "Estado CAFE";
                             if (colIdx === idxCafe + 2) cellVal = "Detalle CAFE";
                         }
 
-                        // Grupo 4: Conexión Efectiva
+                        // GRUPO 4: Conexión Efectiva (3 columnas)
                         if (idxConexion !== -1) {
                             if (colIdx === idxConexion) cellVal = "Conexión Efectiva";
                             if (colIdx === idxConexion + 1) cellVal = "Estado conexion";
@@ -461,32 +470,65 @@
             if (!rawParsedData) return;
 
             processedData = transformCSVData(rawParsedData);
-            logMessage(`Transformación completada. Columnas resultantes: ${processedData[0].length}`, 'success');
+            logMessage(`Ajuste finalizado exitosamente. Total columnas resultantes: ${processedData[0].length}`, 'success');
 
-            renderStructureSummary(processedData[0]);
+            renderStructureSummary(rawParsedData[0].length, processedData[0]);
             renderPreview(processedData);
         }
 
-        function renderStructureSummary(headers) {
+        function renderStructureSummary(origCount, headers) {
             colsBadges.innerHTML = '';
-            totalColsCount.textContent = headers.length;
+            triadsContainer.innerHTML = '';
 
-            const specialNames = [
-                'Contacto Inicial', 'Estado contacto', 'Detalle contacto',
-                'Asignado a CFV', 'Estado CFV', 'Detalle CFV',
-                'Registro Café', 'Estado CAFE', 'Detalle CAFE',
-                'Conexión Efectiva', 'Estado conexion', 'Detalle conexion',
-                'Estado Cita', 'Estado EnForma', 'Estado Ayudas'
+            totalColsCount.textContent = headers.length;
+            colCountDiff.textContent = `Originales: ${origCount} col | Finales: ${headers.length} col (${origCount - headers.length} eliminadas)`;
+
+            // Las 4 Tríadas Exactas
+            const triadsDefinition = [
+                { title: '1. Contacto Inicial', items: ['Contacto Inicial', 'Estado contacto', 'Detalle contacto'] },
+                { title: '2. Asignado a CFV', items: ['Asignado a CFV', 'Estado CFV', 'Detalle CFV'] },
+                { title: '3. Registro Café', items: ['Registro Café', 'Estado CAFE', 'Detalle CAFE'] },
+                { title: '4. Conexión Efectiva', items: ['Conexión Efectiva', 'Estado conexion', 'Detalle conexion'] }
             ];
 
+            const allSpecialNames = new Set();
+
+            triadsDefinition.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-2.5 rounded-lg border border-indigo-200 shadow-sm';
+                
+                let itemsHTML = '';
+                t.items.forEach(item => {
+                    allSpecialNames.add(item);
+                    const present = headers.includes(item);
+                    itemsHTML += `
+                        <div class="flex items-center justify-between py-0.5">
+                            <span class="${present ? 'text-slate-800 font-medium' : 'text-red-500 line-through'}">${item}</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded ${present ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
+                                ${present ? 'OK' : 'Falta'}
+                            </span>
+                        </div>
+                    `;
+                });
+
+                card.innerHTML = `
+                    <div class="font-bold text-indigo-950 mb-1 border-b border-indigo-100 pb-1">${t.title}</div>
+                    <div class="space-y-0.5">${itemsHTML}</div>
+                `;
+                triadsContainer.appendChild(card);
+            });
+
+            // Badges individuales para todas las columnas resultantes
             headers.forEach((h, index) => {
                 const badge = document.createElement('span');
-                const isSpecial = specialNames.includes(h);
+                const isSpecial = allSpecialNames.has(h);
 
                 if (isSpecial) {
-                    badge.className = 'px-2 py-0.5 rounded text-[11px] font-semibold bg-indigo-100 text-indigo-800 border border-indigo-300';
+                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-indigo-600 text-white shadow-sm';
+                } else if (['Estado Cita', 'Estado EnForma', 'Estado Ayudas'].includes(h)) {
+                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300';
                 } else {
-                    badge.className = 'px-2 py-0.5 rounded text-[11px] font-medium bg-white text-slate-600 border border-slate-200';
+                    badge.className = 'px-2 py-1 rounded text-xs font-medium bg-white text-slate-700 border border-slate-200';
                 }
 
                 badge.textContent = `${index + 1}. ${h}`;
@@ -509,17 +551,17 @@
             const headerRow = document.createElement('tr');
             data[0].forEach((headerText) => {
                 const th = document.createElement('th');
-                th.className = 'px-3 py-2.5 text-left font-semibold text-slate-800 bg-slate-100/80 border-b border-slate-200 whitespace-nowrap';
+                th.className = 'px-3 py-2.5 text-left font-semibold text-slate-800 bg-slate-100/90 border-b border-slate-200 whitespace-nowrap';
                 th.textContent = headerText;
                 headerRow.appendChild(th);
             });
             thead.appendChild(headerRow);
 
-            // Primeras 5 filas
+            // Muestra de las primeras 5 filas de datos
             const sampleRows = data.slice(1, 6);
             sampleRows.forEach(rowData => {
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-indigo-50/30 transition-colors';
+                tr.className = 'hover:bg-indigo-50/40 transition-colors';
                 rowData.forEach(cellText => {
                     const td = document.createElement('td');
                     td.className = 'px-3 py-2 border-b border-slate-100 whitespace-nowrap text-slate-700 text-xs';
@@ -529,21 +571,21 @@
                 tbody.appendChild(tr);
             });
 
-            rowCountBadge.textContent = `${data.length - 1} filas listas`;
+            rowCountBadge.textContent = `${data.length - 1} filas procesadas`;
             previewSection.classList.remove('hidden');
         }
 
         processBtn.addEventListener('click', () => {
             if (!processedData) return;
 
-            logMessage('Generando archivo CSV final con UTF-8 BOM...');
+            logMessage('Generando archivo final con formato UTF-8 BOM...');
             
-            // Re-procesar para asegurar últimos datos
+            // Re-procesar para sincronizar los últimos datos
             processedData = transformCSVData(rawParsedData);
 
             const csvOutput = Papa.unparse(processedData);
             
-            // Agregar UTF-8 BOM (\uFEFF) para forzar a Excel a abrir correctamente eñes y tildes
+            // Agregar UTF-8 BOM (\uFEFF) para forzar la lectura correcta de tildes/eñes en Excel
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
             
             const originalName = originalFile ? originalFile.name : 'archivo.csv';
