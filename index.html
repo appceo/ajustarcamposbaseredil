@@ -3,91 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajustador de Nombres y Columnas CSV</title>
+    <title>Ajustador de Columnas y Nombres CSV</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PapaParse CDN para procesamiento eficiente de CSV -->
+    <!-- PapaParse CDN para lectura/escritura eficiente de CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Tipografía Inter y estilos personalizados de tabla */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
 
-    <!-- Header -->
     <header class="bg-indigo-700 text-white shadow-md">
-        <div class="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex items-center justify-between flex-wrap gap-4">
             <div class="flex items-center space-x-3">
-                <i data-lucide="file-spreadsheet" class="w-8 h-8 text-indigo-200"></i>
+                <div class="p-2 bg-indigo-600 rounded-xl shadow-inner">
+                    <i data-lucide="file-spreadsheet" class="w-7 h-7 text-indigo-100"></i>
+                </div>
                 <div>
                     <h1 class="text-xl font-bold tracking-tight">Ajustador de Columnas CSV</h1>
-                    <p class="text-xs text-indigo-200">Procesamiento y Limpieza de Datos para Excel / GitHub Pages</p>
+                    <p class="text-xs text-indigo-200">Reordenamiento de Tríadas y Limpieza de Caracteres para Excel / GitHub Pages</p>
                 </div>
             </div>
-            <span class="text-xs bg-indigo-800/80 border border-indigo-500/30 text-indigo-100 px-3 py-1 rounded-full font-medium shadow-sm">100% Local y Seguro</span>
+            <span class="text-xs bg-indigo-800/90 border border-indigo-400/30 text-indigo-100 px-3 py-1.5 rounded-full font-medium shadow-sm flex items-center gap-1.5">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                Procesamiento Local y Seguro
+            </span>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-8">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8">
         
-        <!-- Intro Card -->
+        <!-- Tarjeta Informativa de Reglas -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
-            <h2 class="text-base font-semibold text-slate-900 mb-2 flex items-center gap-2">
+            <h2 class="text-base font-semibold text-slate-900 mb-3 flex items-center gap-2">
                 <i data-lucide="sparkles" class="w-5 h-5 text-indigo-600"></i>
-                Procesamiento, Limpieza y Reordenamiento de Columnas
+                Especificaciones de Transformación
             </h2>
-            <p class="text-slate-600 text-sm leading-relaxed mb-4">
-                Esta aplicación procesa tu archivo CSV eliminando únicamente las columnas de descarte y **conservando intactas las 12 columnas principales (4 grupos × 3 columnas c/u)** con sus nuevos nombres formateados.
-            </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs bg-slate-50 p-4 rounded-lg border border-slate-200/80">
-                <div>
-                    <span class="font-bold text-slate-700 block mb-1">❌ Supresiones Específicas:</span>
-                    <ul class="list-disc list-inside text-slate-600 space-y-1">
-                        <li><strong>Ingreso a la Iglesia:</strong> Elimina sus 2 columnas contiguas (+1, +2).</li>
-                        <li><strong>Cita con Dios / EnForma / Obrero Ayudas:</strong> Renombra +1 a "Estado..." y elimina +2.</li>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <!-- Reglas de Supresión / Renombrado -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <span class="font-bold text-slate-800 text-sm block mb-2 text-rose-700 flex items-center gap-1">
+                        <i data-lucide="scissors" class="w-4 h-4"></i> Supresiones y Renombrados Específicos
+                    </span>
+                    <ul class="space-y-1.5 text-slate-600">
+                        <li>&bull; <strong>Ingreso a la Iglesia:</strong> Conserva columna y elimina sus 2 contiguas (+1, +2).</li>
+                        <li>&bull; <strong>Cita con Dios:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado Cita</span> y elimina +2.</li>
+                        <li>&bull; <strong>EnForma:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado EnForma</span> y elimina +2.</li>
+                        <li>&bull; <strong>Obrero Ayudas:</strong> Conserva columna, renombra +1 a <span class="bg-amber-100 text-amber-800 font-semibold px-1 rounded">Estado Ayudas</span> y elimina +2.</li>
                     </ul>
                 </div>
-                <div>
-                    <span class="font-bold text-slate-700 block mb-1">✅ 4 Tríadas Conservadas (Total 12 columnas):</span>
-                    <ul class="list-disc list-inside text-slate-600 space-y-1">
-                        <li><span class="font-semibold text-indigo-700">Grupo 1:</span> Contacto Inicial &bull; Estado contacto &bull; Detalle contacto</li>
-                        <li><span class="font-semibold text-indigo-700">Grupo 2:</span> Asignado a CFV &bull; Estado CFV &bull; Detalle CFV</li>
-                        <li><span class="font-semibold text-indigo-700">Grupo 3:</span> Registro Café &bull; Estado CAFE &bull; Detalle CAFE</li>
-                        <li><span class="font-semibold text-indigo-700">Grupo 4:</span> Conexión Efectiva &bull; Estado conexion &bull; Detalle conexion</li>
-                    </ul>
+
+                <!-- Reglas de las 4 Tríadas Reordenadas -->
+                <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-100">
+                    <span class="font-bold text-indigo-900 text-sm block mb-2 flex items-center gap-1">
+                        <i data-lucide="layers" class="w-4 h-4 text-indigo-600"></i> Conservación Obligatoria de las 4 Tríadas (12 cols)
+                    </span>
+                    <div class="grid grid-cols-2 gap-2 text-[11px] text-slate-700">
+                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
+                            <strong class="text-indigo-700 block">1. Contacto Inicial</strong>
+                            <span>Estado contacto &bull; Detalle contacto</span>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
+                            <strong class="text-indigo-700 block">2. Asignado a CFV</strong>
+                            <span>Estado CFV &bull; Detalle CFV</span>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
+                            <strong class="text-indigo-700 block">3. Registro Café</strong>
+                            <span>Estado CAFE &bull; Detalle CAFE</span>
+                        </div>
+                        <div class="bg-white p-2 rounded border border-indigo-100 shadow-2xs">
+                            <strong class="text-indigo-700 block">4. Conexión Efectiva</strong>
+                            <span>Estado conexion &bull; Detalle conexion</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Upload & Process Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <!-- File Input Area -->
+            <!-- Zona de Carga -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
-                        <label class="block text-sm font-medium text-slate-700">1. Seleccionar archivo CSV</label>
-                        <!-- Selector de Codificación -->
-                        <div class="flex items-center space-x-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200">
-                            <span class="text-xs text-slate-600 font-medium pl-1">Codificación:</span>
+                        <label class="block text-sm font-semibold text-slate-800">1. Seleccionar archivo CSV</label>
+                        <!-- Selección de Codificación -->
+                        <div class="flex items-center space-x-1 bg-slate-100 p-1 rounded-lg border border-slate-200">
+                            <span class="text-[11px] text-slate-500 font-medium px-1">Codificación:</span>
                             <select id="encoding-select" class="text-xs font-semibold border-0 rounded px-2 py-1 bg-white text-slate-700 shadow-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
                                 <option value="ISO-8859-1" selected>ISO-8859-1 (Latin1 / Excel)</option>
                                 <option value="UTF-8">UTF-8</option>
+                                <option value="windows-1252">Windows-1252</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="mt-1 flex justify-center px-6 pt-6 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative group" id="drop-zone">
-                        <input id="csv-file-input" type="file" accept=".csv, .txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                    <div class="mt-2 flex justify-center px-6 pt-6 pb-6 border-2 border-slate-300 border-dashed rounded-xl hover:border-indigo-500 transition-colors bg-slate-50/50 cursor-pointer relative group" id="drop-zone">
+                        <input id="csv-file-input" type="file" accept=".csv, .txt" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
                         <div class="space-y-2 text-center">
-                            <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
+                            <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform shadow-xs">
                                 <i data-lucide="upload-cloud" class="w-6 h-6"></i>
                             </div>
                             <div class="flex text-sm text-slate-600 justify-center">
-                                <span class="font-semibold text-indigo-600 hover:text-indigo-500">Haz clic para buscar</span>
-                                <p class="pl-1">o arrastra el archivo aquí</p>
+                                <span class="font-semibold text-indigo-600 hover:text-indigo-500">Haz clic para adjuntar</span>
+                                <p class="pl-1">o arrastra el CSV aquí</p>
                             </div>
-                            <p class="text-xs text-slate-400">Archivos .csv o .txt delimitados por coma</p>
+                            <p class="text-xs text-slate-400">Soporta archivos delimitados por comas o punto y coma</p>
                         </div>
                     </div>
                 </div>
@@ -101,12 +131,15 @@
                 </div>
             </div>
 
-            <!-- Action Area -->
+            <!-- Panel de Control y Estado -->
             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-between">
                 <div>
-                    <h3 class="text-sm font-medium text-slate-700 mb-2">Estado del Procesamiento</h3>
-                    <div id="status-container" class="h-36 rounded-lg border border-slate-200 bg-slate-900 p-3 overflow-y-auto font-mono text-xs text-slate-200 leading-relaxed">
-                        <p class="text-slate-500 italic">> Esperando que selecciones un archivo CSV...</p>
+                    <h3 class="text-sm font-semibold text-slate-800 mb-2 flex items-center justify-between">
+                        <span>Registro de Procesamiento</span>
+                        <span class="text-[11px] font-normal text-slate-400">Consola de depuración</span>
+                    </h3>
+                    <div id="status-container" class="h-36 rounded-xl border border-slate-800 bg-slate-900 p-3 overflow-y-auto font-mono text-xs text-slate-200 leading-relaxed custom-scrollbar shadow-inner">
+                        <p class="text-slate-500 italic">> Adjunta un archivo CSV para comenzar el ajuste...</p>
                     </div>
                 </div>
 
@@ -119,43 +152,42 @@
             </div>
         </div>
 
-        <!-- Structure Summary Badge List -->
         <div id="structure-summary" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8 hidden">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h3 class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                    <i data-lucide="list-checks" class="w-5 h-5 text-emerald-600"></i>
+                    <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600"></i>
                     Verificación de Columnas Finales (<span id="total-cols-count" class="font-bold text-indigo-600">0</span> columnas)
                 </h3>
                 <span id="col-count-diff" class="text-xs bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full font-medium"></span>
             </div>
 
-            <!-- Panel de las 4 Tríadas Confirmadas -->
-            <div class="mb-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+            <!-- Mapeo de Confirmación de las 4 Tríadas -->
+            <div class="mb-5 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
                 <h4 class="text-xs font-bold text-indigo-900 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <i data-lucide="check-circle-2" class="w-4 h-4 text-indigo-600"></i>
-                    Las 12 Columnas Solicitadas (4 Grupos x 3 Campos)
+                    <i data-lucide="shield-check" class="w-4 h-4 text-indigo-600"></i>
+                    Estado de Integridad de las 4 Tríadas (12 Columnas Solicitadas)
                 </h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 text-xs" id="triads-container">
-                    <!-- Dynamic group status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 text-xs" id="triads-container">
+                    <!-- Tarjetas dinámicas de tríadas -->
                 </div>
             </div>
 
-            <p class="text-xs text-slate-500 mb-2 font-medium">Estructura completa en el orden del archivo resultantes:</p>
-            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2 bg-slate-50 rounded-lg border border-slate-200">
+            <p class="text-xs text-slate-500 mb-2 font-medium">Secuencia exacta de encabezados en el archivo resultantes:</p>
+            <div id="cols-badges" class="flex flex-wrap gap-1.5 max-h-48 overflow-y-auto p-2.5 bg-slate-50 rounded-xl border border-slate-200 custom-scrollbar">
                 <!-- Badges de columnas -->
             </div>
         </div>
 
-        <!-- Preview Section -->
         <div id="preview-section" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hidden">
-            <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <div>
-                    <h3 class="text-base font-semibold text-slate-900">Vista Previa del Resultado</h3>
-                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas del archivo transformado con tildes y eñes corregidas</p>
+                    <h3 class="text-base font-semibold text-slate-900">Vista Previa de los Primeros Registros</h3>
+                    <p class="text-xs text-slate-500">Muestra de las primeras 5 filas transformadas con saneamiento de caracteres aplicados</p>
                 </div>
                 <span id="row-count-badge" class="text-xs bg-indigo-50 text-indigo-700 border border-indigo-200 px-3 py-1 rounded-full font-semibold"></span>
             </div>
-            <div class="overflow-x-auto border rounded-xl border-slate-200 max-h-96 shadow-inner">
+
+            <div class="overflow-x-auto border rounded-xl border-slate-200 max-h-96 shadow-inner custom-scrollbar">
                 <table id="preview-table" class="min-w-full divide-y divide-slate-200 text-xs">
                     <thead class="bg-slate-100 sticky top-0 shadow-sm">
                         <!-- Dynamic headers -->
@@ -169,15 +201,13 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 text-center text-xs text-slate-500 flex items-center justify-between">
-            <span>Ajustador de Archivos CSV &bull; Compatible con GitHub Pages</span>
-            <span>Transformación 100% Cliente</span>
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500 flex items-center justify-between flex-wrap gap-2">
+            <span>Ajustador de Nombres y Tríadas CSV &bull; Diseñado para GitHub Pages</span>
+            <span>Transformación 100% en el Navegador</span>
         </div>
     </footer>
 
-    <!-- App Logic JavaScript -->
     <script>
         lucide.createIcons();
 
@@ -203,7 +233,7 @@
         let processedData = null;
         let originalFile = null;
 
-        // Logging UI
+        // Función de registro en la consola virtual
         function logMessage(msg, type = 'info') {
             const p = document.createElement('p');
             p.className = 'font-mono text-xs py-0.5';
@@ -221,14 +251,13 @@
             statusContainer.innerHTML = '';
         }
 
-        // Saneamiento profundo de texto para restaurar caracteres corruptos ()
         function sanitizeText(str) {
             if (str === null || str === undefined) return '';
             let text = str.toString().trim();
 
-            // Reemplazo directo de secuencias corruptas por problemas de codificación de origen
+            // Saneamiento de caracteres corruptos de codificación (ej.  reemplazados por sus tildes/eñes correctas)
             text = text
-                .replace(/\uFFFD/g, 'ñ') // Caracter de reemplazo unicode general
+                .replace(/\uFFFD/g, 'ñ') // Carácter nulo/reemplazo genérico
                 .replace(/Aos\b/gi, 'Años')
                 .replace(/Aos/gi, 'Años')
                 .replace(/Identificacin\b/gi, 'Identificación')
@@ -247,6 +276,7 @@
             return text;
         }
 
+        // Manejo de eventos de entrada de archivo
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -292,7 +322,7 @@
 
             clearLog();
             logMessage(`Cargando archivo: ${file.name}`);
-            logMessage(`Modo de codificación: ${encodingSelect.value}`);
+            logMessage(`Codificación seleccionada: ${encodingSelect.value}`);
 
             const reader = new FileReader();
             reader.onload = function(evt) {
@@ -303,23 +333,23 @@
                     skipEmptyLines: true,
                     complete: function(results) {
                         if (!results.data || results.data.length === 0) {
-                            logMessage('El archivo seleccionado parece estar vacío.', 'error');
+                            logMessage('El archivo seleccionado no contiene registros.', 'error');
                             return;
                         }
 
-                        // Sanear celdas durante la carga
+                        // Saneamiento de la matriz completa
                         rawParsedData = results.data.map(row => 
                             row.map(cell => sanitizeText(cell))
                         );
 
-                        logMessage(`Archivo leído: ${rawParsedData.length} filas x ${rawParsedData[0].length} columnas.`, 'success');
+                        logMessage(`Lectura correcta: ${rawParsedData.length} filas x ${rawParsedData[0].length} columnas.`, 'success');
                         processBtn.disabled = false;
                         
-                        // Procesar y mostrar la vista previa automáticamente
+                        // Procesar y renderizar inmediatamente
                         processAndDisplay();
                     },
                     error: function(err) {
-                        logMessage(`Error en lectura de CSV: ${err.message}`, 'error');
+                        logMessage(`Error al parsear el CSV: ${err.message}`, 'error');
                     }
                 });
             };
@@ -327,12 +357,13 @@
             reader.readAsText(file, encodingSelect.value);
         }
 
+        // Normalización para comparación insensible a tildes y mayúsculas
         function normalizeHeader(str) {
             if (!str) return '';
             return str.toString()
                 .toLowerCase()
-                .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Normalizar tildes
-                .replace(/[^a-z0-9]/g, '') // Solo alfanumérico para comparación limpia
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z0-9]/g, '')
                 .trim();
         }
 
@@ -342,13 +373,13 @@
             const originalHeaders = rows[0];
             const normalizedHeaders = originalHeaders.map(normalizeHeader);
 
-            // Búsqueda flexible de índice de columna por patrón de texto
+            // Búsqueda flexible por subcadena normalizada
             function findColIndex(targetPattern) {
                 const targetNorm = normalizeHeader(targetPattern);
                 return normalizedHeaders.findIndex(h => h.includes(targetNorm));
             }
 
-            // 1. Identificar índices clave en el archivo original
+            // 1. Localización de columnas pivote
             const idxIngreso = findColIndex('ingresoalaiglesia');
             const idxCita = findColIndex('citacondios');
             const idxEnForma = findColIndex('enforma');
@@ -359,12 +390,12 @@
             const idxCafe = findColIndex('registrocafe');
             const idxConexion = findColIndex('conexionefectiva');
 
-            logMessage(`Columnas base detectadas -> Contacto: [${idxContacto}], CFV: [${idxCFV}], Café: [${idxCafe}], Conexión: [${idxConexion}]`);
+            logMessage(`Pivotes hallados -> Contacto: [${idxContacto}], CFV: [${idxCFV}], Café: [${idxCafe}], Conexión: [${idxConexion}]`);
 
-            // 2. Determinar cuáles columnas se DEBEN ELIMINAR expresamente
+            // 2. Definición de columnas a ELIMINAR expresamente
             const colsToDelete = new Set();
 
-            // Ingreso a la Iglesia: suprimir sus 2 columnas contiguas a la derecha (+1, +2)
+            // Ingreso a la Iglesia: suprimir sus 2 contiguas (+1, +2)
             if (idxIngreso !== -1) {
                 colsToDelete.add(idxIngreso + 1);
                 colsToDelete.add(idxIngreso + 2);
@@ -379,7 +410,7 @@
             // Obrero Ayudas: renombra +1, elimina +2
             if (idxObrero !== -1) colsToDelete.add(idxObrero + 2);
 
-            // 3. Agrupar las 12 columnas asociadas a los 4 grupos requeridos (3 por cada uno)
+            // 3. Extracción de los índices de las 4 Tríadas principales (3 columnas por cada una = 12 cols)
             const getTriadIndices = (baseIdx) => {
                 if (baseIdx === -1) return [];
                 return [baseIdx, baseIdx + 1, baseIdx + 2];
@@ -390,7 +421,7 @@
             const triadCafe = getTriadIndices(idxCafe);
             const triadConexion = getTriadIndices(idxConexion);
 
-            // Conjunto de todos los índices pertenecientes a las 4 tríadas (12 columnas en total)
+            // Conjunto total de las 12 columnas asociadas a las Tríadas
             const triadsIndicesSet = new Set([
                 ...triadContacto,
                 ...triadCFV,
@@ -398,17 +429,17 @@
                 ...triadConexion
             ]);
 
-            // 4. Construir la secuencia completa de índices del nuevo archivo CSV
+            // 4. Mapeo de la secuencia final del nuevo archivo CSV
             const baseColumns = [];
 
-            // Añadir las columnas normales respetando el orden pero excluyendo las eliminadas y las 12 de las tríadas
+            // Añadir el resto de columnas respetando orden original, omitiendo las eliminadas y las 12 de las tríadas
             for (let i = 0; i < originalHeaders.length; i++) {
                 if (colsToDelete.has(i)) continue;
-                if (triadsIndicesSet.has(i)) continue; // Reservadas para colocación explicita
+                if (triadsIndicesSet.has(i)) continue; // Se colocarán ordenadas explícitamente abajo
                 baseColumns.push(i);
             }
 
-            // Secuencia final de columnas: Columnas generales + Las 4 Tríadas Reordenadas (12 columnas)
+            // Estructura final: Columnas generales + Las 4 Tríadas Garantizadas (12 columnas en orden)
             const finalIndicesOrder = [
                 ...baseColumns,
                 ...triadContacto,
@@ -417,7 +448,7 @@
                 ...triadConexion
             ];
 
-            // 5. Generar la nueva matriz de datos con los encabezados exactos y valores limpios
+            // 5. Construir la nueva matriz de datos
             return rows.map((row, rowIndex) => {
                 const newRow = [];
 
@@ -425,33 +456,33 @@
                     let cellVal = row[colIdx] !== undefined ? row[colIdx] : '';
 
                     if (rowIndex === 0) {
-                        // Nombres de columnas renombradas por supresión parcial
+                        // Asignación de nombres requeridos a columnas modificadas
                         if (idxCita !== -1 && colIdx === idxCita + 1) cellVal = "Estado Cita";
                         if (idxEnForma !== -1 && colIdx === idxEnForma + 1) cellVal = "Estado EnForma";
                         if (idxObrero !== -1 && colIdx === idxObrero + 1) cellVal = "Estado Ayudas";
 
-                        // GRUPO 1: Contacto Inicial (3 columnas)
+                        // Nombres exactos para GRUPO 1: Contacto Inicial
                         if (idxContacto !== -1) {
                             if (colIdx === idxContacto) cellVal = "Contacto Inicial";
                             if (colIdx === idxContacto + 1) cellVal = "Estado contacto";
                             if (colIdx === idxContacto + 2) cellVal = "Detalle contacto";
                         }
 
-                        // GRUPO 2: Asignado a CFV (3 columnas)
+                        // Nombres exactos para GRUPO 2: Asignado a CFV
                         if (idxCFV !== -1) {
                             if (colIdx === idxCFV) cellVal = "Asignado a CFV";
                             if (colIdx === idxCFV + 1) cellVal = "Estado CFV";
                             if (colIdx === idxCFV + 2) cellVal = "Detalle CFV";
                         }
 
-                        // GRUPO 3: Registro Café (3 columnas)
+                        // Nombres exactos para GRUPO 3: Registro Café
                         if (idxCafe !== -1) {
                             if (colIdx === idxCafe) cellVal = "Registro Café";
                             if (colIdx === idxCafe + 1) cellVal = "Estado CAFE";
                             if (colIdx === idxCafe + 2) cellVal = "Detalle CAFE";
                         }
 
-                        // GRUPO 4: Conexión Efectiva (3 columnas)
+                        // Nombres exactos para GRUPO 4: Conexión Efectiva
                         if (idxConexion !== -1) {
                             if (colIdx === idxConexion) cellVal = "Conexión Efectiva";
                             if (colIdx === idxConexion + 1) cellVal = "Estado conexion";
@@ -470,7 +501,7 @@
             if (!rawParsedData) return;
 
             processedData = transformCSVData(rawParsedData);
-            logMessage(`Ajuste finalizado exitosamente. Total columnas resultantes: ${processedData[0].length}`, 'success');
+            logMessage(`Transformación finalizada. Columnas totales del CSV ajustado: ${processedData[0].length}`, 'success');
 
             renderStructureSummary(rawParsedData[0].length, processedData[0]);
             renderPreview(processedData);
@@ -481,9 +512,9 @@
             triadsContainer.innerHTML = '';
 
             totalColsCount.textContent = headers.length;
-            colCountDiff.textContent = `Originales: ${origCount} col | Finales: ${headers.length} col (${origCount - headers.length} eliminadas)`;
+            colCountDiff.textContent = `Originales: ${origCount} col | Resultantes: ${headers.length} col (${origCount - headers.length} eliminadas)`;
 
-            // Las 4 Tríadas Exactas
+            // Estructura oficial de las 4 Tríadas
             const triadsDefinition = [
                 { title: '1. Contacto Inicial', items: ['Contacto Inicial', 'Estado contacto', 'Detalle contacto'] },
                 { title: '2. Asignado a CFV', items: ['Asignado a CFV', 'Estado CFV', 'Detalle CFV'] },
@@ -495,7 +526,7 @@
 
             triadsDefinition.forEach(t => {
                 const card = document.createElement('div');
-                card.className = 'bg-white p-2.5 rounded-lg border border-indigo-200 shadow-sm';
+                card.className = 'bg-white p-3 rounded-lg border border-indigo-200 shadow-xs flex flex-col justify-between';
                 
                 let itemsHTML = '';
                 t.items.forEach(item => {
@@ -503,8 +534,8 @@
                     const present = headers.includes(item);
                     itemsHTML += `
                         <div class="flex items-center justify-between py-0.5">
-                            <span class="${present ? 'text-slate-800 font-medium' : 'text-red-500 line-through'}">${item}</span>
-                            <span class="text-[10px] px-1.5 py-0.2 rounded ${present ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
+                            <span class="${present ? 'text-slate-800 font-medium' : 'text-red-500 line-through'} truncate">${item}</span>
+                            <span class="text-[10px] px-1.5 py-0.2 rounded font-semibold ${present ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-700'}">
                                 ${present ? 'OK' : 'Falta'}
                             </span>
                         </div>
@@ -512,21 +543,21 @@
                 });
 
                 card.innerHTML = `
-                    <div class="font-bold text-indigo-950 mb-1 border-b border-indigo-100 pb-1">${t.title}</div>
+                    <div class="font-bold text-indigo-950 mb-1 border-b border-indigo-100 pb-1 text-[11px]">${t.title}</div>
                     <div class="space-y-0.5">${itemsHTML}</div>
                 `;
                 triadsContainer.appendChild(card);
             });
 
-            // Badges individuales para todas las columnas resultantes
+            // Badges individuales para la lista completa
             headers.forEach((h, index) => {
                 const badge = document.createElement('span');
                 const isSpecial = allSpecialNames.has(h);
 
                 if (isSpecial) {
-                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-indigo-600 text-white shadow-sm';
+                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-indigo-600 text-white shadow-xs';
                 } else if (['Estado Cita', 'Estado EnForma', 'Estado Ayudas'].includes(h)) {
-                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-300';
+                    badge.className = 'px-2 py-1 rounded text-xs font-semibold bg-amber-100 text-amber-900 border border-amber-300';
                 } else {
                     badge.className = 'px-2 py-1 rounded text-xs font-medium bg-white text-slate-700 border border-slate-200';
                 }
@@ -538,6 +569,7 @@
             structureSummary.classList.remove('hidden');
         }
 
+        // Renderizado de tabla de vista previa de los datos
         function renderPreview(data) {
             if (!data || data.length === 0) return;
 
@@ -557,7 +589,7 @@
             });
             thead.appendChild(headerRow);
 
-            // Muestra de las primeras 5 filas de datos
+            // Muestra de las primeras 5 filas
             const sampleRows = data.slice(1, 6);
             sampleRows.forEach(rowData => {
                 const tr = document.createElement('tr');
@@ -578,14 +610,14 @@
         processBtn.addEventListener('click', () => {
             if (!processedData) return;
 
-            logMessage('Generando archivo final con formato UTF-8 BOM...');
+            logMessage('Generando CSV codificado con UTF-8 BOM para Microsoft Excel...');
             
-            // Re-procesar para sincronizar los últimos datos
+            // Re-procesar para asegurar que tome la última matriz
             processedData = transformCSVData(rawParsedData);
 
             const csvOutput = Papa.unparse(processedData);
             
-            // Agregar UTF-8 BOM (\uFEFF) para forzar la lectura correcta de tildes/eñes en Excel
+            // Inclusión de BOM UTF-8 (\uFEFF -> 0xEF, 0xBB, 0xBF)
             const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvOutput], { type: 'text/csv;charset=utf-8;' });
             
             const originalName = originalFile ? originalFile.name : 'archivo.csv';
@@ -598,7 +630,7 @@
             link.click();
             document.body.removeChild(link);
 
-            logMessage(`¡Descarga iniciada! Nombre: ${newFileName}`, 'success');
+            logMessage(`¡Descarga completada! Nombre: ${newFileName}`, 'success');
         });
     </script>
 </body>
